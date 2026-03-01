@@ -1,52 +1,52 @@
 [
   {
-    "rank": 1,
     "productName": "엔에스 포대유청 WPC 오리지널 2kg",
     "productPrice": 41500,
     "productUrl": "https://link.coupang.com/a/test_link_4",
     "productImage": "https://thumbnail8.coupangcdn.com/test.jpg",
     "totalQuantity": "2000g",
-    "unitPriceStr": "10g당 208원",
-    "unitPriceVal": 207.5
+    "unitPriceStr": "10g당 207원",
+    "unitPriceVal": 20.75,
+    "rank": 1
   },
   {
-    "rank": 2,
     "productName": "컴뱃 100% 웨이 프로틴 파우더 2.2 킬로그램 x 2개",
     "productPrice": 120000,
     "productUrl": "https://link.coupang.com/a/test_link_3",
     "productImage": "https://thumbnail8.coupangcdn.com/test.jpg",
     "totalQuantity": "4400g",
-    "unitPriceStr": "10g당 273원",
-    "unitPriceVal": 272.72727272727275
+    "unitPriceStr": "10g당 272원",
+    "unitPriceVal": 27.272727272727273,
+    "rank": 2
   },
   {
-    "rank": 3,
     "productName": "칼로바이 퍼펙트 파워쉐이크 단백질 보충제 1000g",
     "productPrice": 32900,
     "productUrl": "https://link.coupang.com/a/test_link_5",
     "productImage": "https://thumbnail8.coupangcdn.com/test.jpg",
     "totalQuantity": "1000g",
     "unitPriceStr": "10g당 329원",
-    "unitPriceVal": 329.0
+    "unitPriceVal": 32.9,
+    "rank": 3
   },
   {
-    "rank": 4,
     "productName": "신타6 아이솔레이트 단백질 보충제 초코맛 2.27kg",
     "productPrice": 79000,
     "productUrl": "https://link.coupang.com/a/test_link_1",
     "productImage": "https://thumbnail8.coupangcdn.com/test.jpg",
     "totalQuantity": "2270g",
     "unitPriceStr": "10g당 348원",
-    "unitPriceVal": 348.01762114537445
+    "unitPriceVal": 34.801762114537446,
+    "rank": 4
   },
   {
-    "rank": 5,
     "productName": "마이프로틴 임팩트 웨이 2kg+270g 증정 특별기획",
     "productPrice": 85000,
     "productUrl": "https://link.coupang.com/a/test_link_2",
     "productImage": "https://thumbnail8.coupangcdn.com/test.jpg",
     "totalQuantity": "2270g",
     "unitPriceStr": "10g당 374원",
-    "unitPriceVal": 374.44933920704847
+    "unitPriceVal": 37.44493392070485,
+    "rank": 5
   }
 ]

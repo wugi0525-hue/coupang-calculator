@@ -4,75 +4,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <title>가성비 기저귀 추천 Top 20</title>
     <style>
+        :root {
+            --primary-color: #0073e9;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-muted: #888888;
+        }
+
         body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .product-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .rank-badge {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .product-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        .price-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e52528;
+            /* 쿠팡 특색 색상 */
+        }
+
+        .unit-price {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .unit-price span {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .affiliate-notice {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        /* 1, 2, 3위 특별 스타일 */
+        .product-card:nth-child(1) .rank-badge {
+            color: #FFD700;
+            font-size: 1.5rem;
+        }
+
+        .product-card:nth-child(2) .rank-badge {
+            color: #C0C0C0;
+            font-size: 1.4rem;
+        }
+
+        .product-card:nth-child(3) .rank-badge {
+            color: #CD7F32;
+            font-size: 1.3rem;
         }
     </style>
 </head>
 
-<body class="text-slate-800 antialiased">
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-sm border-x border-slate-100">
-        <!-- Header -->
-        <header class="bg-slate-900 text-slate-100 p-6">
-            <h1 class="text-xl font-bold mb-3 tracking-tight">제가 쓰려고 만든<br>단백질 보충제 진짜 단가(10g당) 계산기</h1>
-            <p class="text-slate-400 text-sm leading-relaxed font-light">
-                물가는 오르는데 꼼수 용량으로 장난치는 거 하나하나 계산하기 짜증나서, 매일 아침 직접 발품 팔아 '10g당 진짜 최저가'를 계산해 올리고 있습니다.<br>저부터 한 푼이라도 아끼려고
-                만든 노가다 장부입니다. 우리 다 같이 빡세게 비교해서 살림에 보탬 좀 되어봐요!
-            </p>
-            <p class="text-[11px] text-slate-500 mt-4 flex items-center">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
-                마지막 업데이트: {{ update_date }}
-            </p>
-        </header>
+<body>
 
-        <!-- Ranking List -->
-        <main class="p-4 space-y-4 mt-2">
-            {% for item in items %}
-            <div
-                class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col gap-3 hover:bg-slate-50 transition-colors">
+    <header>
+        <h1>🏆 이달의 기저귀 가성비 랭킹</h1>
+        <p>1매당 가격을 분석해 가장 저렴한 순서대로 추천합니다.</p>
+    </header>
 
-                <div class="flex gap-4 items-center">
-                    <div
-                        class="font-bold text-2xl {% if item.rank == 1 %}text-slate-900{% else %}text-slate-400{% endif %} w-6 text-center">
-                        {{ item.rank }}<span class="text-xs font-normal text-slate-400 block -mt-1">위</span>
-                    </div>
+    <div class="container">
+        {% for item in items %}
+        <a href="{{ item.productUrl }}" target="_blank" rel="noopener noreferrer" class="product-card">
+            <div class="rank-badge">{{ loop.index }}위</div>
+            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
+            {% if item.productImage %}
+            <img src="{{ item.productImage }}" alt="상품 이미지" class="product-image">
+            {% else %}
+            <div class="product-image"
+                style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:0.8rem;">
+                이미지<br>준비중</div>
+            {% endif %}
 
-                    <img src="{{ item.productImage }}" alt="상품 이미지"
-                        class="w-16 h-16 object-cover rounded-lg border border-slate-100">
-
-                    <div class="flex-1">
-                        <h2 class="text-sm text-slate-700 line-clamp-2 leading-snug">{{ item.productName }}</h2>
-                        <div class="mt-2 flex items-baseline gap-2">
-                            <span class="text-lg font-bold text-slate-900">{{ item.unitPriceStr }}</span>
-                            <span class="text-[11px] text-slate-400 line-through">{{ "{:,}".format(item.productPrice)
-                                }}원</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-3 pb-1 border-t border-slate-50">
-                    <a href="{{ item.productUrl }}" target="_blank" rel="noopener noreferrer"
-                        class="block w-full text-center text-slate-600 font-medium py-2 rounded-lg text-[13px] bg-slate-100 hover:bg-slate-200 transition-colors">
-                        {% if item.rank == 1 %}👍 1위 상품 쿠팡에서 보기{% else %}이 상품 쿠팡에서 보기{% endif %}
-                    </a>
+            <div class="product-info">
+                <h2 class="product-name">{{ item.productName }}</h2>
+                <div class="price-info">
+                    <div class="total-price">{{ "{:,}".format(item.productPrice) }}원</div>
+                    <div class="unit-price">{{ item.unitPriceStr }}</div>
                 </div>
             </div>
-            {% endfor %}
-        </main>
+        </a>
+        {% endfor %}
 
-        <!-- Footer -->
-        <footer class="p-6 text-center text-[11px] text-slate-400 mt-4 pb-12 bg-slate-50 border-t border-slate-100">
-            <p class="mb-2 font-semibold text-slate-500">매일 아침 눈 빠지게 계산한 이 노가다 랭킹이 100원이라도 아끼는 데 도움이 되셨길 바랍니다!</p>
-            <p class="leading-relaxed">
-                (본 링크를 통해 기분 좋게 득템하시면, 쿠팡 파트너스 활동의 일환으로<br>저에게도 소정의 수수료가 지원되어 내일 표를 갱신할 큰 힘이 됩니다 🙇‍♂️)
-            </p>
-        </footer>
+        <div class="affiliate-notice">
+            이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.<br>
+            데이터 수집 시점에 따라 실제 가격과 차이가 있을 수 있습니다.
+        </div>
     </div>
+
 </body>
 
 </html>
