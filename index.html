@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가성비 기저귀 추천 Top 20</title>
+    <title>🔥 실시간 기저귀 1장당 진짜 단가 랭킹 🔥</title>
     <style>
         :root {
             --primary-color: #0073e9;
@@ -12,6 +12,7 @@
             --card-background: #ffffff;
             --text-color: #333333;
             --text-muted: #888888;
+            --tab-bg: #e0e0e0;
         }
 
         body {
@@ -22,6 +23,7 @@
             padding: 0;
         }
 
+        /* 1. 헤더 영역 */
         header {
             background-color: var(--primary-color);
             color: white;
@@ -41,10 +43,112 @@
             opacity: 0.9;
         }
 
-        .container {
-            max-width: 600px;
+        /* 2. 레이아웃: 사이드바 + 메인 콘텐츠 */
+        .main-layout {
+            display: flex;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        aside {
+            width: 250px;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            background-color: var(--background-color);
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            aside {
+                width: auto;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                max-height: 300px;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+
+        /* 트리 메뉴 스타일 */
+        .tree-root {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .tree-root ul {
+            list-style: none;
+            padding-left: 1rem;
+            margin: 0.2rem 0;
+            border-left: 1px dashed #ccc;
+        }
+
+        .tree-root li {
+            margin: 0.3rem 0;
+        }
+
+        details>summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.4rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+            user-select: none;
+            font-size: 0.95rem;
+        }
+
+        details>summary:hover {
+            background-color: #f0f0f0;
+        }
+
+        details[open]>summary {
+            color: var(--primary-color);
+        }
+
+        .leaf-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            width: 100%;
+            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+            border-radius: 4px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .leaf-btn::before {
+            content: '└';
+            position: absolute;
+            left: 0.2rem;
+            color: #ccc;
+        }
+
+        .leaf-btn:hover {
+            background-color: #f0f0f0;
+            color: var(--primary-color);
+        }
+
+        .leaf-btn.active {
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #e6f2ff;
         }
 
         .product-card {
@@ -110,7 +214,6 @@
             font-size: 1.1rem;
             font-weight: bold;
             color: #e52528;
-            /* 쿠팡 특색 색상 */
         }
 
         .unit-price {
@@ -123,28 +226,42 @@
             color: var(--primary-color);
         }
 
+        .badge {
+            font-size: 0.75rem;
+            color: #fff;
+            background-color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
         .affiliate-notice {
             text-align: center;
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 2rem;
             padding: 1rem;
+            line-height: 1.5;
         }
 
-        /* 1, 2, 3위 특별 스타일 */
-        .product-card:nth-child(1) .rank-badge {
+        /* 메달 색상 */
+        .rank-1 {
             color: #FFD700;
             font-size: 1.5rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .product-card:nth-child(2) .rank-badge {
+        .rank-2 {
             color: #C0C0C0;
             font-size: 1.4rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .product-card:nth-child(3) .rank-badge {
+        .rank-3 {
             color: #CD7F32;
             font-size: 1.3rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -154,97 +271,167 @@
     <header>
         <h1>🏆 이달의 기저귀 가성비 랭킹</h1>
         <p>1매당 가격을 분석해 가장 저렴한 순서대로 추천합니다.</p>
+        <p style="font-size: 0.8rem; margin-top: 0.3rem;">업데이트: 2026년 03월 05일 오전 (매일 자동 갱신)</p>
     </header>
 
-    <div class="container">
-        
-        <a href="https://link.coupang.com/a/test_link_4" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">1위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            
-            <img src="https://thumbnail8.coupangcdn.com/test.jpg" alt="상품 이미지" class="product-image">
-            
-
-            <div class="product-info">
-                <h2 class="product-name">엔에스 포대유청 WPC 오리지널 2kg</h2>
-                <div class="price-info">
-                    <div class="total-price">41,500원</div>
-                    <div class="unit-price">10g당 207원</div>
-                </div>
+    <div class="main-layout">
+        <aside>
+            <h3
+                style="margin-top:0; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; color: var(--text-color);">
+                카테고리 분류</h3>
+            <div id="sidebar-tree">
+                <!-- 트리 메뉴가 JS에 의해 렌더링 됩니다. -->
             </div>
-        </a>
-        
-        <a href="https://link.coupang.com/a/test_link_3" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">2위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            
-            <img src="https://thumbnail8.coupangcdn.com/test.jpg" alt="상품 이미지" class="product-image">
-            
+        </aside>
 
-            <div class="product-info">
-                <h2 class="product-name">컴뱃 100% 웨이 프로틴 파우더 2.2 킬로그램 x 2개</h2>
-                <div class="price-info">
-                    <div class="total-price">120,000원</div>
-                    <div class="unit-price">10g당 272원</div>
-                </div>
-            </div>
-        </a>
-        
-        <a href="https://link.coupang.com/a/test_link_5" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">3위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            
-            <img src="https://thumbnail8.coupangcdn.com/test.jpg" alt="상품 이미지" class="product-image">
-            
-
-            <div class="product-info">
-                <h2 class="product-name">칼로바이 퍼펙트 파워쉐이크 단백질 보충제 1000g</h2>
-                <div class="price-info">
-                    <div class="total-price">32,900원</div>
-                    <div class="unit-price">10g당 329원</div>
-                </div>
-            </div>
-        </a>
-        
-        <a href="https://link.coupang.com/a/test_link_1" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">4위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            
-            <img src="https://thumbnail8.coupangcdn.com/test.jpg" alt="상품 이미지" class="product-image">
-            
-
-            <div class="product-info">
-                <h2 class="product-name">신타6 아이솔레이트 단백질 보충제 초코맛 2.27kg</h2>
-                <div class="price-info">
-                    <div class="total-price">79,000원</div>
-                    <div class="unit-price">10g당 348원</div>
-                </div>
-            </div>
-        </a>
-        
-        <a href="https://link.coupang.com/a/test_link_2" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">5위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            
-            <img src="https://thumbnail8.coupangcdn.com/test.jpg" alt="상품 이미지" class="product-image">
-            
-
-            <div class="product-info">
-                <h2 class="product-name">마이프로틴 임팩트 웨이 2kg+270g 증정 특별기획</h2>
-                <div class="price-info">
-                    <div class="total-price">85,000원</div>
-                    <div class="unit-price">10g당 374원</div>
-                </div>
-            </div>
-        </a>
-        
-
-        <div class="affiliate-notice">
-            이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.<br>
-            데이터 수집 시점에 따라 실제 가격과 차이가 있을 수 있습니다.
-        </div>
+        <main id="product-container">
+            <!-- 랭킹 상품들이 JS에 의해 동적으로 렌더링 됩니다. -->
+        </main>
     </div>
 
+    <div class="affiliate-notice">
+        이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.<br>
+        데이터 수집 시점에 따라 실제 가격과 차이가 있을 수 있습니다.
+    </div>
+
+    <script>
+        // 파이썬 로직에서 전달받은 원본 전체 데이터 (JSON 형태)
+        const allItems = [{"productId": 8750123631, "productName": "하기스 2024 네이처메이드밤부 팬티형 기저귀 남아용 중형 3팩, 3단계, 192매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 192, "productPrice": 84300, "unitPrice": 439, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/8542/4ea0a273c119989dd0b908c515da032df426b8ff851e3e3182b35e2942ac.jpg", "productUrl": "https://www.coupang.com/vp/products/8750123631?itemId=25600686106&vendorItemId=92591341862&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=31&rank=31"}, {"productId": 9334664178, "productName": "하기스 네이처메이드 팬티형 기저귀 남아용 4팩, 3단계, 256매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 256, "productPrice": 113500, "unitPrice": 443, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/3843/abd892878307fbea58cc70a026f79d4606912e794c38e6db4da4cbdabd6a.png", "productUrl": "https://www.coupang.com/vp/products/9334664178?itemId=26433573296&vendorItemId=93287327384&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=26&rank=26"}, {"productId": 7871824636, "productName": "하기스 2025 네이처메이드 팬티형 3단계 남아 64매X6팩, 384매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 384, "productPrice": 208900, "unitPrice": 544, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/a149/a4008ac24a2d6a80dac3cd3f7eb8e35a30f68344720b5feaf1a666563af7.png", "productUrl": "https://www.coupang.com/vp/products/7871824636?itemId=27120046529&vendorItemId=94280005232&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=28&rank=28"}, {"productId": 9334783431, "productName": "2025 하기스 네이처메이드 팬티형 3단계 남아 64매X2팩 중형 자연주의 기저귀, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 128, "productPrice": 79700, "unitPrice": 623, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/f573/cb0adfe9130ac5ba557e7f48f848a1d0b72b1c7615611bb11c11f8e88531.png", "productUrl": "https://www.coupang.com/vp/products/9334783431?itemId=26994502349&vendorItemId=94364179457&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=24&rank=24"}, {"productId": 7188037764, "productName": "하기스 네이처메이드밤부 팬티형 기저귀 남아용 대형, 3단계, 64매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 64, "productPrice": 43700, "unitPrice": 683, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/ce08/59806f79490ff312190638db8c557fc71926a4a2f351466498d8d2f1c31c.png", "productUrl": "https://www.coupang.com/vp/products/7188037764?itemId=23866295217&vendorItemId=87771028050&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=30&rank=30"}, {"productId": 9358026461, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 남아용, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 128, "productPrice": 88000, "unitPrice": 688, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/189954612592838-a261f772-34d1-4794-862b-fa17903e15c6.jpg", "productUrl": "https://www.coupang.com/vp/products/9358026461?itemId=21877030628&vendorItemId=88539611115&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=2&rank=2"}, {"productId": 9202002081, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 남아용 특대형, 64매, 3단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 64, "productPrice": 45350, "unitPrice": 709, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/14ed/b1e4ae07e0a62d4cddba543284eb9d9232292e5da7775d2e60a2389d6948.png", "productUrl": "https://www.coupang.com/vp/products/9202002081?itemId=27877939823&vendorItemId=94515759938&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=22&rank=22"}, {"productId": 8750133949, "productName": "하기스 NEW 네이처메이드 오가닉 팬티형 기저귀 남아용, 3단계, 54매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 54, "productPrice": 39500, "unitPrice": 731, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/475a/02a3db1dc8b2150ff97ce6e06312f0dc34118378f35a018c7b7c82adba70.png", "productUrl": "https://www.coupang.com/vp/products/8750133949?itemId=25134874451&vendorItemId=92133927247&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=29&rank=29"}, {"productId": 8415236521, "productName": "하기스 네이처메이드 팬티형 기저귀 중형 남아용, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 128, "productPrice": 111000, "unitPrice": 867, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/22/11/1/a87c045f-d8aa-4dda-b85b-7e5a77b1e6cc.png", "productUrl": "https://www.coupang.com/vp/products/8415236521?itemId=26676624663&vendorItemId=93648862701&pickType=COU_PICK&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=0&rank=0"}, {"productId": 8461466299, "productName": "하기스 2025 네이처메이드밤부 팬티형 기저귀 중형 남아용 2팩, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "남아용", "total_count": 128, "productPrice": 115400, "unitPrice": 902, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/22/9/5/02c4d768-a7ab-4146-a235-882a275b3af5.png", "productUrl": "https://www.coupang.com/vp/products/8461466299?itemId=27877558827&vendorItemId=93648314644&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=c383d7b01338177&sourceType=search&itemsCount=36&searchRank=23&rank=23"}, {"productId": 7867859869, "productName": "하기스 네이처메이드 밤부 기저귀 팬티형 여아용 중형 2팩, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 128, "productPrice": 56800, "unitPrice": 444, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/e14a/9226cacd28637b1bd5274451157cf4046ed308108e456718beed26b34a28.jpg", "productUrl": "https://www.coupang.com/vp/products/7867859869?itemId=25601317512&vendorItemId=92591965384&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=14&rank=14"}, {"productId": 8412759486, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 여아용, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 128, "productPrice": 60000, "unitPrice": 469, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/69e5/436ad24d3dca01a7e348f4e43a150cf68f19b39f686f3b5ce8fa3e7302f0.jpg", "productUrl": "https://www.coupang.com/vp/products/8412759486?itemId=2371086020&vendorItemId=94095246818&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=3&rank=3"}, {"productId": 9388295346, "productName": "자체브랜드 하기스 네이처메이드 밤부 기저귀 팬티형 여아용, 3단계, 64매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 64, "productPrice": 29990, "unitPrice": 469, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/e14a/9226cacd28637b1bd5274451157cf4046ed308108e456718beed26b34a28.jpg", "productUrl": "https://www.coupang.com/vp/products/9388295346?itemId=25218246604&vendorItemId=92591362080&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=26&rank=26"}, {"productId": 9314424319, "productName": "하기스 2025 네이처메이드 팬티형 3단계 여아 64매X6팩, 384매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 384, "productPrice": 208900, "unitPrice": 544, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/d415/d9927754fad47889f3dd94e1b24f2f9178e03ed5f90be19d09ca7025db8e.png", "productUrl": "https://www.coupang.com/vp/products/9314424319?itemId=27313567377&vendorItemId=94280004515&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=31&rank=31"}, {"productId": 9237772820, "productName": "하기스 2025 네이처메이드 팬티형 3단계 여아 64매X2팩, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 128, "productPrice": 69700, "unitPrice": 545, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/79e0/6933eacebf4f3ab31b6d04866d93738d3a32599ba04c92eaeebd0757c8c8.png", "productUrl": "https://www.coupang.com/vp/products/9237772820?itemId=27313567810&vendorItemId=94280005080&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=16&rank=16"}, {"productId": 8750565600, "productName": "하기스 2024 네이처메이드 팬티형 기저귀 여아용, 3단계, 64매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 64, "productPrice": 36900, "unitPrice": 577, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/0511/f849393bac145c5c0ad14e409c668a640c1c613643fab566017d3d0bd1f0.jpg", "productUrl": "https://www.coupang.com/vp/products/8750565600?itemId=26881945114&vendorItemId=94780869532&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=28&rank=28"}, {"productId": 8414626936, "productName": "2021 신형 하기스 네이처메이드 밤부 팬티형 기저귀 여아용, 3단계, 64매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 64, "productPrice": 40280, "unitPrice": 629, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/d0fa/4f945af41dc0c3e3f84257b166e6c60e32df788a6e12a9147733b0047764.png", "productUrl": "https://www.coupang.com/vp/products/8414626936?itemId=23258262069&vendorItemId=93982843877&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=9&rank=9"}, {"productId": 8457572506, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 여아용, 3단계, 128매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 128, "productPrice": 115400, "unitPrice": 902, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/22/9/7/b8794439-9d7c-4d10-9f04-0f0db5c4ba34.png", "productUrl": "https://www.coupang.com/vp/products/8457572506?itemId=21724294031&vendorItemId=93648314676&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=0&rank=0"}, {"productId": 9306513426, "productName": "FF 2025 하기스 네이처메이드 팬티형 3단계 여아 64매X4팩 중형 자연주의 기저귀 447862, 2025 하기스 네이처메이드 팬티형 3단계 남", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 256, "productPrice": 293400, "unitPrice": 1146, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/3b7e/83337de8c30ce3145b23261aabfbd2164ac122f7b5102ee5b6fb5e3300d0.jpg", "productUrl": "https://www.coupang.com/vp/products/9306513426?itemId=27572866961&vendorItemId=94536693887&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=18&rank=18"}, {"productId": 9154944275, "productName": "하기스 브랜드관 하기스 네이처메이드팬티 3단계 여아 중형 64매, 하기스 하기스 맥스드라이 팬티 3단계 여아 중형 64매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "3단계", "gender": "여아용", "total_count": 64, "productPrice": 74400, "unitPrice": 1162, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/84bf/b1e6f952924ffc014db9f6539b2602f55543231bd781f7ee8f593f4d8557.jpg", "productUrl": "https://www.coupang.com/vp/products/9154944275?itemId=27688972728&vendorItemId=94787840562&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=0d2f14b01996213&sourceType=search&itemsCount=36&searchRank=33&rank=33"}, {"productId": 9392196345, "productName": "하기스 네이처메이드 팬티형 기저귀 남아용 4팩, 208매, 4단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 208, "productPrice": 113500, "unitPrice": 546, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/3843/abd892878307fbea58cc70a026f79d4606912e794c38e6db4da4cbdabd6a.png", "productUrl": "https://www.coupang.com/vp/products/9392196345?itemId=26433573284&vendorItemId=93287327383&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=14&rank=14"}, {"productId": 9160909659, "productName": "하기스 NEW 2023 네이처메이드 팬티 5단계 (남아) 44매 팬티형 남아용, 52매, 4단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 52, "productPrice": 31900, "unitPrice": 613, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/1b2d/00e175b4e9f9cb9a474fdc22651f9f7f545b1abfafe645ef9abf0645ac67.jpg", "productUrl": "https://www.coupang.com/vp/products/9160909659?itemId=26523067708&vendorItemId=93497386484&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=13&rank=13"}, {"productId": 9335168354, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 남아용, 4단계, 104개", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 104, "productPrice": 65000, "unitPrice": 625, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/3101/56422d4964f744fce1cba922fcc80946b62db7b0401fe99c7f53d859abbd.jpg", "productUrl": "https://www.coupang.com/vp/products/9335168354?itemId=27625461859&vendorItemId=88948440953&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=9&rank=9"}, {"productId": 8411427694, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 남아용, 4단계, 52개", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 52, "productPrice": 35000, "unitPrice": 673, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/f929/4c3a192fa6d3a5318a927631a293a9bf393ef2993661cd48c623fbc839bc.jpg", "productUrl": "https://www.coupang.com/vp/products/8411427694?itemId=27625461867&vendorItemId=88948440940&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=15&rank=15"}, {"productId": 8750123631, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 남아용 대형, 4단계, 54매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 54, "productPrice": 37050, "unitPrice": 686, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/1602/6183ea0fb4f854cb7b45f296d0cd3061f6edda0c42a52f1437df6151d7ae.png", "productUrl": "https://www.coupang.com/vp/products/8750123631?itemId=27367367872&vendorItemId=94516220513&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=21&rank=21"}, {"productId": 9080722280, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 남아용 특대형, 216매, 4단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 216, "productPrice": 157000, "unitPrice": 727, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/26c7/f7aa71e8e8af7a65df36c569fd464906affdfe536ff29511a257a3ccbd33.png", "productUrl": "https://www.coupang.com/vp/products/9080722280?itemId=27153667147&vendorItemId=93982373178&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=26&rank=26"}, {"productId": 9080799956, "productName": "2025 하기스 네이처메이드 팬티형 남아용, 52매, 4단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 52, "productPrice": 37900, "unitPrice": 729, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/1b2d/00e175b4e9f9cb9a474fdc22651f9f7f545b1abfafe645ef9abf0645ac67.jpg", "productUrl": "https://www.coupang.com/vp/products/9080799956?itemId=26869114326&vendorItemId=93838727540&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=16&rank=16"}, {"productId": 7188037764, "productName": "하기스 네이처메이드밤부 팬티형 기저귀 남아용 대형 4단계(9~13kg), 4단계, 270매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 270, "productPrice": 201700, "unitPrice": 747, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/4dc4/d20ac4e7b14de8aecba04c57913b2ab85493c9046cf7ead4904f6c88f266.png", "productUrl": "https://www.coupang.com/vp/products/7188037764?itemId=19940372114&vendorItemId=86847384844&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=24&rank=24"}, {"productId": 9335425808, "productName": "2025 하기스 네이처메이드 팬티형 4단계 남아 52매X2팩 대형 자연주의 기저귀, 단품", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 104, "productPrice": 79700, "unitPrice": 766, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/9aee/6a261edc773913c49caacbf2b7b86d870ed41345356b93419e15de1ad567.png", "productUrl": "https://www.coupang.com/vp/products/9335425808?itemId=26994502737&vendorItemId=94364180419&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=27&rank=27"}, {"productId": 8415236521, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 남아용, 4단계, 104매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 104, "productPrice": 111000, "unitPrice": 1067, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/03/17/7/f28182a8-48a1-4190-bd93-1d454a680bcc.png", "productUrl": "https://www.coupang.com/vp/products/8415236521?itemId=22067223429&vendorItemId=93488048656&pickType=COU_PICK&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=0&rank=0"}, {"productId": 9055590053, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 남아용 대형, 4단계, 108매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "남아용", "total_count": 108, "productPrice": 115400, "unitPrice": 1069, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/02/15/8/e38547d3-b62a-4510-b547-8025ef97c615.png", "productUrl": "https://www.coupang.com/vp/products/9055590053?itemId=26503978533&vendorItemId=93478679236&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EB%82%A8%EC%95%84&searchId=19678f454388060&sourceType=search&itemsCount=35&searchRank=2&rank=2"}, {"productId": 9334763774, "productName": "하기스 네이처메이드 팬티형 기저귀 4단계 52매 4팩 여아, 208매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 208, "productPrice": 120800, "unitPrice": 581, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/b5a3/49c4209e8a4ea4f79d755f0c6265e92c061b2a7223e7868273dc6852e9e8.jpg", "productUrl": "https://www.coupang.com/vp/products/9334763774?itemId=16501465356&vendorItemId=83985449549&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=44&rank=44"}, {"productId": 9314424319, "productName": "2025 하기스 네이처메이드 팬티형 기저귀 여아용, 4단계, 104매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 104, "productPrice": 61900, "unitPrice": 595, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/df5c/5981da8b34f3808c9b14d9f7e8f81fd72f21bf8e900b4848d1f634c0ff1d.jpg", "productUrl": "https://www.coupang.com/vp/products/9314424319?itemId=27796721313&vendorItemId=93840036710&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=16&rank=16"}, {"productId": 9034759273, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 여아용 대형, 4단계, 54매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 54, "productPrice": 34500, "unitPrice": 639, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/4829/642e23266b8fdef7d2bcabc4140965ed73683455d66416f7325fa9240141.png", "productUrl": "https://www.coupang.com/vp/products/9034759273?itemId=27179423053&vendorItemId=94147027993&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=26&rank=26"}, {"productId": 8414626936, "productName": "2021 신형 하기스 네이처메이드 밤부 팬티형 기저귀 여아용 대형 4단계 (9~13kg), 106매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 106, "productPrice": 69000, "unitPrice": 651, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/d1a3/58302f1e08ae691166da960c0686e5df3ee0881eb960e437b8d456a2f2ca.jpg", "productUrl": "https://www.coupang.com/vp/products/8414626936?itemId=11842683723&vendorItemId=79116027746&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=34&rank=34"}, {"productId": 8750565600, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 여아용, 4단계, 52개", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 52, "productPrice": 35000, "unitPrice": 673, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/d189/ead2b5562c06baf7718d8502b6da417adfdc013e96a40553d0cbe36fa86b.jpg", "productUrl": "https://www.coupang.com/vp/products/8750565600?itemId=27696881926&vendorItemId=88948404687&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=9&rank=9"}, {"productId": 9396246704, "productName": "하기스 2024 네이처메이드 팬티형 기저귀 여아용, 4단계, 52매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 52, "productPrice": 36900, "unitPrice": 710, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/c9be/9aa40fea480ead3eaa0b217c3d580ee9c55e523176b6fb0c88bc2444ac3b.png", "productUrl": "https://www.coupang.com/vp/products/9396246704?itemId=27821179627&vendorItemId=94780901231&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=33&rank=33"}, {"productId": 9410092060, "productName": "하기스 2025 네이처메이드 밤부 팬티 여아, 108매, 4단계", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 108, "productPrice": 82300, "unitPrice": 762, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/079f/bd875cae454cea805b56888b410d9c2de2962c5255e43f611a6e9a0da57e.png", "productUrl": "https://www.coupang.com/vp/products/9410092060?itemId=27959671389&vendorItemId=94917729568&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=23&rank=23"}, {"productId": 9314250901, "productName": "하기스 2025 네이처메이드 팬티형 4단계 여아 52매X2팩, 104매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 104, "productPrice": 79700, "unitPrice": 766, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/647f/7c35a5f81f56104d757fefb3180a4afc89ed1f49ce3523bcc4f9d044f69e.png", "productUrl": "https://www.coupang.com/vp/products/9314250901?itemId=27198001414&vendorItemId=94364181027&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=24&rank=24"}, {"productId": 8412759486, "productName": "하기스 NEW 네이처메이드 팬티형 기저귀 여아용, 4단계, 104매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 104, "productPrice": 111000, "unitPrice": 1067, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/03/17/0/83e07de0-b754-425d-b1df-b9e878b6cb9e.png", "productUrl": "https://www.coupang.com/vp/products/8412759486?itemId=23741100654&vendorItemId=93488048712&pickType=COU_PICK&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=0&rank=0"}, {"productId": 9335365975, "productName": "하기스 네이처메이드 팬티형 기저귀 여아용 대형, 4단계, 208매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 208, "productPrice": 222000, "unitPrice": 1067, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/3746538902640-8526ec69-f726-47a6-a1f8-c91225b039dd.jpg", "productUrl": "https://www.coupang.com/vp/products/9335365975?itemId=26523504526&vendorItemId=93497814107&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=3&rank=3"}, {"productId": 8457572506, "productName": "하기스 네이처메이드 밤부 팬티형 기저귀 여아용, 4단계, 108매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 108, "productPrice": 115400, "unitPrice": 1069, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/09/02/15/2/fd21239b-2377-4142-a2cb-26dd59372f5b.png", "productUrl": "https://www.coupang.com/vp/products/8457572506?itemId=19999710079&vendorItemId=93478679239&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=2&rank=2"}, {"productId": 9393961583, "productName": "하기스 2025 네이처메이드 밤부 팬티형 4단계 여아 54매X2팩, 108매", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 108, "productPrice": 204620, "unitPrice": 1895, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/0beb/d1b7bbeafb457de5e9cdd4e8997f7aa85a8e5b28e3be9a2809e11cd7095a.jpg", "productUrl": "https://www.coupang.com/vp/products/9393961583?itemId=27898048307&vendorItemId=94856918231&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=36&rank=36"}, {"productId": 9335383242, "productName": "하기스 2025 네이처메이드 밤부 팬티형 4단계 여아 54매X4팩, 2025 네이처메이드 밤부 팬티형 4단계 여아 54매X", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 54, "productPrice": 162100, "unitPrice": 3002, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/e73d/a11d211a8fea908ca7e5c83ddbfd4d07c4c288c507c8ba3a5f9858161b2f.png", "productUrl": "https://www.coupang.com/vp/products/9335383242?itemId=27262261556&vendorItemId=94364171953&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=39&rank=39"}, {"productId": 9190626750, "productName": "하기스 2025 네이처메이드 팬티형 4단계 여아 52매X8팩", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 52, "productPrice": 289900, "unitPrice": 5575, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/af7b/9daf2159423c20e95c8c3ca74424ed796f2c1be87d9caaf52c60b3fbc89b.png", "productUrl": "https://www.coupang.com/vp/products/9190626750?itemId=27120043951&vendorItemId=94364193723&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=45&rank=45"}, {"productId": 9392428995, "productName": "2024 하기스 네이처메이드 밤부 팬티형 4단계 여아용 54매X4팩 대형 아기 기저귀", "brand": "하기스", "line": "네이처메이드", "type": "팬티형", "stage": "4단계", "gender": "여아용", "total_count": 54, "productPrice": 423720, "unitPrice": 7847, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/67e0/5dda0a4ee702fa979dfdbc3d292d5c4b8cd4f5d9d7b9157342c5532d66e2.jpg", "productUrl": "https://www.coupang.com/vp/products/9392428995?itemId=27833610082&vendorItemId=94793150289&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%84%A4%EC%9D%B4%EC%B2%98%EB%A9%94%EC%9D%B4%EB%93%9C%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84%20%EC%97%AC%EC%95%84&searchId=2f3e1cb91376053&sourceType=search&itemsCount=47&searchRank=18&rank=18"}, {"productId": 9335100743, "productName": "하기스 뉴 맥스드라이 팬티형 기저귀 남여공용, 3단계, 200매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 200, "productPrice": 85600, "unitPrice": 428, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2024/09/13/15/0/4af51079-1ff3-44b7-92f3-8718ad737c6b.png", "productUrl": "https://www.coupang.com/vp/products/9335100743?itemId=23950410917&vendorItemId=91110909988&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=6&rank=6"}, {"productId": 8065577198, "productName": "bx하기스 맥스드라이에어팬티 3단계 공용 120매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 120, "productPrice": 56220, "unitPrice": 468, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/a699/ab2b21ca7d47c3569ef1711564c71b7862da0cb99a26a7078105ad544f97.jpg", "productUrl": "https://www.coupang.com/vp/products/8065577198?itemId=26999609870&vendorItemId=93968330605&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=32&rank=32"}, {"productId": 9314180211, "productName": "하기스 2021 신형 맥스드라이 기저귀 점보형 6단계(14~19kg) 팬티형 아동공용, 3단계, 100매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 100, "productPrice": 57500, "unitPrice": 575, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/91ef/88e222b08a8be94587847a998d88dc92408273a228b4fae1f913930acbd8.png", "productUrl": "https://www.coupang.com/vp/products/9314180211?itemId=27191684276&vendorItemId=94159184482&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=46&rank=46"}, {"productId": 8359638409, "productName": "하기스 뉴 맥스드라이 팬티형 기저귀 남여공용, 3단계, 50매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 50, "productPrice": 36900, "unitPrice": 738, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/7834/672ddccee34b3c0e9ed3186362dd7bf77c17aceb91198d7663a482f1e04b.png", "productUrl": "https://www.coupang.com/vp/products/8359638409?itemId=23950410906&vendorItemId=90972118727&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=18&rank=18"}, {"productId": 8750574165, "productName": "하기스 2025 맥스드라이 에어 팬티형 기저귀 남여공용, 3단계, 112매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 112, "productPrice": 83900, "unitPrice": 749, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/03/07/14/8/24a61ab6-37d2-43f0-b643-9e4bc52a9c7e.png", "productUrl": "https://www.coupang.com/vp/products/8750574165?itemId=25056394210&vendorItemId=92060759931&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=2&rank=2"}, {"productId": 8815364363, "productName": "하기스 맥스드라이 팬티형 기저귀 3단계 팬티 중형 공용 100매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "3단계", "gender": "공용", "total_count": 100, "productPrice": 112500, "unitPrice": 1125, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/a671/01a4d7751dbbfedb3524316b3c2f08ffdedd2c8bd4ae3cadd3115188ea0e.jpg", "productUrl": "https://www.coupang.com/vp/products/8815364363?itemId=25685598927&vendorItemId=92674930149&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%203%EB%8B%A8%EA%B3%84&searchId=386236944343359&sourceType=search&itemsCount=60&searchRank=48&rank=48"}, {"productId": 8065577198, "productName": "2025 하기스 맥스드라이 에어팬티 대형 공용 1팩, 4단계, 48매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 48, "productPrice": 27040, "unitPrice": 563, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/7f56/5ec826ce5feaffe2533a346183caddcac0ce684895378cc91b01b8a5e600.jpg", "productUrl": "https://www.coupang.com/vp/products/8065577198?itemId=25589675117&vendorItemId=92580493830&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=a2bf5f774220341&sourceType=search&itemsCount=48&searchRank=27&rank=27"}, {"productId": 9335100743, "productName": "하기스 2024 맥스드라이 팬티형 기저귀 남여공용, 4단계, 168매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 168, "productPrice": 106360, "unitPrice": 633, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/4a00/8604728496cd33bedca23eb2da357a8681e43ba1a24ed3a2ab8bf4b86290.png", "productUrl": "https://www.coupang.com/vp/products/9335100743?itemId=23074631977&vendorItemId=90972118775&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=a2bf5f774220341&sourceType=search&itemsCount=48&searchRank=10&rank=10"}, {"productId": 9314180211, "productName": "하기스 2021 신형 맥스드라이 기저귀 점보형 6단계(14~19kg) 팬티형 아동공용, 4단계, 84매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 84, "productPrice": 67900, "unitPrice": 808, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/c530/35e09c3a016c4baf4be4c61ae673642bcdfee4bfc2cc399fa6bd1e1b8816.png", "productUrl": "https://www.coupang.com/vp/products/9314180211?itemId=27191704614&vendorItemId=94159205762&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=a2bf5f774220341&sourceType=search&itemsCount=48&searchRank=32&rank=32"}, {"productId": 8750574165, "productName": "하기스 2025 맥스드라이 에어 팬티형 기저귀 남여공용, 4단계, 96매", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 96, "productPrice": 83900, "unitPrice": 874, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/2025/03/07/14/8/b09d6cd7-81d8-4d84-9f63-b8e6aec35ce2.png", "productUrl": "https://www.coupang.com/vp/products/8750574165?itemId=25056394208&vendorItemId=92060759923&pickType=COU_PICK&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=a2bf5f774220341&sourceType=search&itemsCount=48&searchRank=2&rank=2"}, {"productId": 9224569609, "productName": "하기스 맥스드라이 팬티형 기저귀 대형 4단계 팬티 공용 210매 - 4단계, 하기스 네이처메이드 팬티형 기저귀 4단계 팬티 대형 공", "brand": "하기스", "line": "맥스드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 210, "productPrice": 273000, "unitPrice": 1300, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/a91a/f082f8fb9409cb245ad91dab24939b64223cede047aa2a739fbc9dc8572d.jpg", "productUrl": "https://www.coupang.com/vp/products/9224569609?itemId=25685297414&vendorItemId=92674628044&q=%ED%95%98%EA%B8%B0%EC%8A%A4%20%EB%A7%A5%EC%8A%A4%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=a2bf5f774220341&sourceType=search&itemsCount=48&searchRank=38&rank=38"}, {"productId": 7779133442, "productName": "팸퍼스 베이비드라이 엑스트라 흡수 팬티형 기저귀 남여공용, 4단계, 180매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 180, "productPrice": 77700, "unitPrice": 432, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/3cd3/9c880eb5494e3c55cb308ca2646b979b65f29ae3ec1d3e77e079af47d0d2.jpg", "productUrl": "https://www.coupang.com/vp/products/7779133442?itemId=21488210551&vendorItemId=88083903209&sourceType=srp_product_ads&clickEventId=c15c2df0-189a-11f1-8a4a-7fd0bd3bf3ae&korePlacement=15&koreSubPlacement=1&clickEventId=c15c2df0-189a-11f1-8a4a-7fd0bd3bf3ae&korePlacement=15&koreSubPlacement=1"}, {"productId": 8750362716, "productName": "팸퍼스 2025 베이비드라이 팬티형 기저귀 남녀공용, 4단계, 168매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 168, "productPrice": 82300, "unitPrice": 490, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/463276640274862-fd9c156a-901d-44d4-a12d-0a764deef472.jpg", "productUrl": "https://www.coupang.com/vp/products/8750362716?itemId=23985695476&vendorItemId=91006762184&pickType=COU_PICK&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=d486b4045804429&sourceType=search&itemsCount=72&searchRank=1&rank=1"}, {"productId": 8355728893, "productName": "팸퍼스 2025 베이비드라이 팬티형 기저귀 남녀공용, 4단계, 42매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 42, "productPrice": 21490, "unitPrice": 512, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/1d3e/0cbe74964be84c4a6590c400dbb82ea9dcb525681a142ec34fbeee7cfe76.jpg", "productUrl": "https://www.coupang.com/vp/products/8355728893?itemId=26998837889&vendorItemId=91209043143&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=d486b4045804429&sourceType=search&itemsCount=72&searchRank=9&rank=9"}, {"productId": 9314474919, "productName": "데코마당 3세트 팬티 4 5 6단계 유로 팸퍼스 베이비드라이 팬티형 기저귀 pampers 아동공용, 4단계, 312매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 312, "productPrice": 186200, "unitPrice": 597, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/f341/f94062d7fc7e1dd4058fa2fe79480c7442efa24dd9a6b1db723d8af69e4f.jpg", "productUrl": "https://www.coupang.com/vp/products/9314474919?itemId=23994523375&vendorItemId=90083572211&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=d486b4045804429&sourceType=search&itemsCount=72&searchRank=28&rank=28"}, {"productId": 8635829038, "productName": "팸퍼스 2025 베이비드라이 팬티형 기저귀 남녀공용 4단계 168p + 밤기저귀 4단계 120p, 1세트", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "4단계", "gender": "공용", "total_count": 168, "productPrice": 116900, "unitPrice": 696, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/retail/images/422102000704873-fc63b478-02c0-4f5a-bd33-7f5cba99d7ee.jpg", "productUrl": "https://www.coupang.com/vp/products/8635829038?itemId=25056839921&vendorItemId=92061165989&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%204%EB%8B%A8%EA%B3%84&searchId=d486b4045804429&sourceType=search&itemsCount=72&searchRank=11&rank=11"}, {"productId": 8376710494, "productName": "팸퍼스 베이비드라이 팬티형 기저귀 아동공용, 5단계, 144매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "5단계", "gender": "공용", "total_count": 144, "productPrice": 73700, "unitPrice": 512, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/f395/bea6d7a6c8070d60598ca64c866a667e4aa321a619be109d2c910d276b2a.jpg", "productUrl": "https://www.coupang.com/vp/products/8376710494?itemId=78939810&vendorItemId=94916188504&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%205%EB%8B%A8%EA%B3%84&searchId=fb3d66944537360&sourceType=search&itemsCount=69&searchRank=11&rank=11"}, {"productId": 8973980694, "productName": "팸퍼스 2025 베이비드라이 팬티형 기저귀 남녀공용, 36매, 5단계", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "5단계", "gender": "공용", "total_count": 36, "productPrice": 20340, "unitPrice": 565, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/7efc/7d83672179c6aca4b6a4bd63db5ecd1ceaae5ce18d382badcae8de538763.jpg", "productUrl": "https://www.coupang.com/vp/products/8973980694?itemId=26998852092&vendorItemId=91209052918&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%205%EB%8B%A8%EA%B3%84&searchId=fb3d66944537360&sourceType=search&itemsCount=69&searchRank=1&rank=1"}, {"productId": 7779133442, "productName": "팸퍼스 베이비드라이 엑스트라 흡수 팬티형 기저귀 아동공용 5단계(12-17kg), 5단계, 52매", "brand": "팸퍼스", "line": "베이비드라이", "type": "팬티형", "stage": "5단계", "gender": "공용", "total_count": 52, "productPrice": 29790, "unitPrice": 573, "productImage": "https://thumbnail.coupangcdn.com/thumbnails/remote/657x657q90trim/image/vendor_inventory/f178/525dd95097cfb3c765238984cb9df351cf7ba3bd4580f21e789e90694a9a.jpg", "productUrl": "https://www.coupang.com/vp/products/7779133442?itemId=23598644941&vendorItemId=91656774633&q=%ED%8C%B8%ED%8D%BC%EC%8A%A4%20%EB%B2%A0%EC%9D%B4%EB%B9%84%EB%93%9C%EB%9D%BC%EC%9D%B4%20%ED%8C%AC%ED%8B%B0%205%EB%8B%A8%EA%B3%84&searchId=fb3d66944537360&sourceType=search&itemsCount=69&searchRank=2&rank=2"}];
+
+        // 1. 트리 구조 데이터 생성
+        const categoryTree = {};
+
+        allItems.forEach(item => {
+            if (!categoryTree[item.brand]) categoryTree[item.brand] = {};
+            if (!categoryTree[item.brand][item.line]) categoryTree[item.brand][item.line] = {};
+            if (!categoryTree[item.brand][item.line][item.type]) categoryTree[item.brand][item.line][item.type] = {};
+
+            const leaf = `${item.stage} ${item.gender}`;
+            // Leaf 값으로는 상품 필터링을 위한 원본 카테고리 문자열을 저장
+            const fullCategoryKey = `${item.brand} ${item.line} ${item.type} ${item.stage} ${item.gender}`;
+            categoryTree[item.brand][item.line][item.type][leaf] = fullCategoryKey;
+        });
+
+        const getCategoryKey = (item) => `${item.brand} ${item.line} ${item.type} ${item.stage} ${item.gender}`;
+
+        let currentCategoryPath = ''; // 활성화된 필터 카테고리
+        const sidebarTree = document.getElementById('sidebar-tree');
+        const productContainer = document.getElementById('product-container');
+
+        // 트리 DOM 재귀적 렌더링 함수
+        function createTreeDOM(tree, isRoot = false) {
+            const ul = document.createElement('ul');
+            if (isRoot) ul.className = 'tree-root';
+
+            for (const key in tree) {
+                const li = document.createElement('li');
+
+                if (typeof tree[key] === 'string') {
+                    // Leaf Node (버튼)
+                    const btn = document.createElement('button');
+                    btn.className = 'leaf-btn';
+                    btn.textContent = key;
+
+                    const fullCategory = tree[key];
+
+                    btn.onclick = () => {
+                        // 모든 버튼 active 초기화
+                        document.querySelectorAll('.leaf-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        currentCategoryPath = fullCategory;
+                        renderProducts();
+
+                        // 모바일 화면일 때 클릭 후 부드럽게 목록으로 스크롤 이동
+                        if (window.innerWidth <= 768) {
+                            productContainer.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    };
+
+                    li.appendChild(btn);
+
+                    // 초기 활성 상태 설정 (첫 번째 리프 노드)
+                    if (!currentCategoryPath) {
+                        currentCategoryPath = fullCategory;
+                        btn.classList.add('active');
+                    }
+                } else {
+                    // Branch Node (details/summary)
+                    const details = document.createElement('details');
+                    // 사용자 요청에 따라 모든 Depth의 메뉴를 기본적으로 열어둠
+                    details.open = true;
+
+                    const summary = document.createElement('summary');
+                    summary.textContent = key;
+                    details.appendChild(summary);
+
+                    // 재귀 호출
+                    details.appendChild(createTreeDOM(tree[key], false));
+                    li.appendChild(details);
+                }
+                ul.appendChild(li);
+            }
+            return ul;
+        }
+
+        // 3. 상품 렌더링
+        function renderProducts() {
+            // 현재 선택된 카테고리에 맞는 상품만 필터링
+            const filteredItems = allItems.filter(item => getCategoryKey(item) === currentCategoryPath);
+
+            // unitPrice(1장당 가격) 기준으로 오름차순(저렴한 순) 정렬
+            filteredItems.sort((a, b) => a.unitPrice - b.unitPrice);
+
+            productContainer.innerHTML = '';
+
+            if (filteredItems.length === 0) {
+                productContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">선택한 카테고리에 상품이 없습니다.</p>';
+                return;
+            }
+
+            filteredItems.forEach((item, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+
+                const badgeInfo = `${item.brand} ${item.line} ${item.type} ${item.stage}`;
+
+                // 숫자 천단위 콤마 포맷터
+                const formatPrice = (price) => new Intl.NumberFormat('ko-KR').format(price);
+
+                const cardHtml = `
+                    <a href="${item.productUrl}" target="_blank" rel="noopener noreferrer" class="product-card">
+                        <div class="rank-badge ${rankClass}">${rank}위</div>
+                        ${item.productImage
+                        ? `<img src="${item.productImage}" alt="상품 이미지" class="product-image">`
+                        : `<div class="product-image" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:0.8rem;">이미지<br>준비중</div>`
+                    }
+                        <div class="product-info">
+                            <div class="badge">${badgeInfo}</div>
+                            <h2 class="product-name">${item.productName}</h2>
+                            <div class="price-info">
+                                <div class="total-price">${formatPrice(item.productPrice)}원 <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(총 ${item.total_count}매)</span></div>
+                                <div class="unit-price">1장당 <span>${formatPrice(item.unitPrice)}원</span></div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                // DOMParser를 쓰거나 문자열 이어붙이기 (단순히 innerHTML 추가)
+                productContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 4. 초기화 실행
+        if (allItems.length > 0) {
+            const treeDOM = createTreeDOM(categoryTree, true);
+            sidebarTree.appendChild(treeDOM);
+            renderProducts();
+        } else {
+            productContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">데이터가 없습니다.</p>';
+        }
+    </script>
 </body>
 
 </html>

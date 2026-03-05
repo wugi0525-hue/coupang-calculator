@@ -1,30 +1,37 @@
 import os
+import sys
 import json
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
+# 윈도우 콘솔 한글 인코딩 에러 방지 (UTF-8 강제)
+sys.stdout.reconfigure(encoding='utf-8')
+
 def build():
     # 1. 랭킹 데이터 불러오기
     try:
-        with open('final_ranking.json', 'r', encoding='utf-8') as f:
+        with open('data.json', 'r', encoding='utf-8') as f:
             rankings = json.load(f)
     except FileNotFoundError:
-        print("❌ final_ranking.json 파일이 없습니다. calc_logic.py를 먼저 실행하세요.")
+        print("❌ data.json 파일이 없습니다. calc_logic.py를 먼저 실행하세요.")
         return
 
-    # 2. Jinja2 환경 셋팅
+    # Jinja2 템플릿에서 사용할 수 있도록 포맷팅된 데이터 준비는 더 이상 파이썬에서 안 해도 됨 (JS로 위임)
+    # 대표 타이틀 
+    dynamic_title = "🔥 실시간 기저귀 1장당 진짜 단가 랭킹 🔥"
+        
+    # Jinja2 환경 셋팅
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('template.html')
 
-    # 오늘 날짜 구하기 (사람이 직접 업데이트한 느낌을 주기 위함)
-    today_str = datetime.now().strftime("%Y년 %m월 %d일 오전 (매일 아침 수작업 갱신 완료)")
+    # 오늘 날짜
+    today_str = datetime.now().strftime("%Y년 %m월 %d일 오전 (매일 자동 갱신)")
 
-    # 3. HTML 렌더링 (데이터 주입)
-    # 현재 적용된 계산기 주제를 컨텍스트 변수로 전달
+    # HTML 렌더링 (전체 데이터를 JSON 문자열로 주입)
     context = {
-        "title": "단백질 보충제 10g당 진짜 단가(가격) 랭킹",
+        "title": dynamic_title,
         "update_date": today_str,
-        "items": rankings
+        "items_json": json.dumps(rankings, ensure_ascii=False)
     }
     output_html = template.render(context)
 

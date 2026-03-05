@@ -1,16 +1,37 @@
+# -*- coding: utf-8 -*-
 import os
 import time
+import json
+import base64
+import io
+import win32clipboard
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-import pyperclip
-from PIL import Image
-import win32clipboard
-import io
+from selenium.webdriver.common.keys import Keys
+
+import google.generativeai as genai
+from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# .env 파일에서 환경변수 불러오기
+load_dotenv()
+
+# Gemini API 설정 (환경변수에서 읽어옴, 없으면 비어둠)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    client = genai
+else:
+    client = None
+
+class BlogPost(BaseModel):
+    title: str
+    content: str
 
 # 1. 클립보드에 이미지 복사하는 마법의 함수 (PyWin32 & Pillow 활용)
 def send_image_to_clipboard(filepath):
@@ -73,17 +94,37 @@ def write_naver_blog(driver, naver_id, title, content, image_path):
             print("⚠️ iframe 탐색 패스:", e)
 
         # ---------------------------------------------------------------------------------
+        # 2.5 팝업 제거 (이전 글 불러오기 안내창 등)
+        # ---------------------------------------------------------------------------------
+        print("🔍 방해꾼 팝업(작성중인 글 여부 등)이 있는지 확인합니다...")
+        try:
+            # 팝업의 취소 버튼 클릭 시도
+            cancel_btns = driver.find_elements(By.CSS_SELECTOR, "button.se-popup-button-cancel, .se-popup-button-cancel")
+            if cancel_btns:
+                cancel_btns[0].click()
+                print("✅ [취소] 버튼 팝업을 성공적으로 닫았습니다.")
+                time.sleep(1)
+        except Exception as e:
+            pass
+            
+        # 추가적으로 화면의 dim(회색 배경)을 클릭해서 닫거나 ESC 키 전송
+        try:
+            ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+            time.sleep(1)
+        except:
+            pass
+
+        # ---------------------------------------------------------------------------------
         # 3. 제목 작성
         # ---------------------------------------------------------------------------------
         print("✍️ 제목 입력 중...")
         try:
-            # 제목 입력 칸 (클래스명에 title이 포함된 영역)
+            # 제목 입력 칸 (물리적 포커싱 강제)
             title_area = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, ".se-title-text p, .se-title-text span, .se-title-text"))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".se-title-text p, span.se-placeholder"))
             )
-            title_area.click()
-            time.sleep(1)
-            
+            ActionChains(driver).move_to_element(title_area).click().perform()
+            time.sleep(0.5)
             ActionChains(driver).send_keys(title).perform()
             time.sleep(1)
         except Exception as e:
@@ -95,14 +136,12 @@ def write_naver_blog(driver, naver_id, title, content, image_path):
         # ---------------------------------------------------------------------------------
         print("✍️ 본문 입력 중...")
         try:
-            # 본문 입력 칸 (본문 영역 클릭 활성화)
+            # 본문 입력 칸
             content_area = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, ".se-main-container .se-text-paragraph, .se-component.se-text"))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".se-main-container .se-text-paragraph, p.se-text-paragraph"))
             )
-            content_area.click()
-            time.sleep(1)
-            
-            # 본문 텍스트 타이핑
+            ActionChains(driver).move_to_element(content_area).click().perform()
+            time.sleep(0.5)
             ActionChains(driver).send_keys(content).perform()
             time.sleep(1)
 
@@ -110,15 +149,29 @@ def write_naver_blog(driver, naver_id, title, content, image_path):
             print("❌ 본문 입력 실패:", e)
             raise e
 
-        # 3. 캡처한 이미지 업로드 로직 (사진 버튼 누르고 파일 대화창 제어는 복잡하므로 클립보드 붙여넣기 꼼수 활용)
-        print("🖼️ 클립보드에서 사진 본문에 붙여넣기 시도...")
-        send_image_to_clipboard(CAPTURE_IMG)
+        # 3. 캡처한 이미지 클립보드 붙여넣기 및 하이퍼링크 삽입
+        print("🖼️ 클립보드 사진 업로드 및 링크 삽입 시도...")
+        send_image_to_clipboard(image_path)
         time.sleep(1)
-        # 본문 끝에서 엔터 두 번 치고 공간 확보 후 이미지 붙여넣기
-        action = ActionChains(driver) # Re-initialize action chains if needed, or ensure it's in scope
+        
+        action = ActionChains(driver)
         action.send_keys(Keys.ENTER).send_keys(Keys.ENTER).perform()
+        # 이미지 붙여넣기
         action.key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-        time.sleep(5) # 사진 업로드 렌더링 딜레이 대기
+        time.sleep(5) # 사진 업로드 렌더링 대기
+        
+        try:
+            # 이미지 선택 후 링크 삽입 (Shift + Left 로 선택 후 Ctrl + K)
+            action.key_down(Keys.SHIFT).send_keys(Keys.ARROW_LEFT).key_up(Keys.SHIFT).perform()
+            time.sleep(1)
+            action.key_down(Keys.CONTROL).send_keys('k').key_up(Keys.CONTROL).perform()
+            time.sleep(1)
+            action.send_keys("https://wugi0525-hue.github.io/coupang-calculator/").send_keys(Keys.ENTER).perform()
+            time.sleep(1)
+            # 커서 원상복구 (오른쪽으로 이동 후 엔터 두번)
+            action.send_keys(Keys.ARROW_RIGHT).send_keys(Keys.ENTER).send_keys(Keys.ENTER).perform()
+        except:
+            pass
 
         # 5. 발행 팝업 열기 (우측 상단 '발행' 버튼 클릭)
         print("🚀 [발행] 팝업 열기...")
@@ -141,6 +194,79 @@ def write_naver_blog(driver, naver_id, title, content, image_path):
     except Exception as e:
         print(f"❌ 네이버 블로그 작성 중 오류 발생:\n{e}")
 
+# 4. Gemini API를 이용한 블로그 제목 및 본문 자동 생성
+def generate_blog_content(data_filepath, calc_url):
+    """
+    정제된 기저귀 단가 데이터(data.json)를 읽어서
+    Gemini 모델이 육아 블로그 스타일의 제목과 본문을 자동 작성합니다.
+    """
+    if not client:
+        print("⚠️ Gemini API 키가 없어 기본 텍스트를 반환합니다.")
+        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+
+    try:
+        with open(data_filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+         print("❌ data.json 불러오기 실패:", e)
+         return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+
+    if not data:
+        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+
+    # 첫번째 아이템으로 메인 테마 추출
+    theme_item = data[0]
+    brand = theme_item.get("brand", "인기")
+    line = theme_item.get("line", "")
+    type_ = theme_item.get("type", "팬티형")
+    stage = theme_item.get("stage", "")
+    gender = theme_item.get("gender", "남녀공용")
+    
+    product_theme = f"{brand} {line} {type_} {stage} {gender}".strip()
+
+    prompt = f"""
+    당신은 네이버 블로그 육아/육아템 전문 리뷰어이자 가성비 특가 알리미입니다.
+    이번 주제는 '{product_theme}' 단일 상품에 대한 패키지 매수별 장당 진짜 가격(단가) 랭킹입니다.
+
+    다음 기저귀 단가 랭킹 데이터를 바탕으로, 엄마들이 클릭하고 싶어지는 블로그 포스팅 제목과 본문을 작성해주세요.
+    
+    데이터:
+    {json.dumps(data, ensure_ascii=False, indent=2)}
+
+    작성 가이드라인:
+    1. 친근하고 공감가는 육아맘/육아대디 말투를 사용하세요. 가독성을 위해 이모지를 적절히(너무 많지 않게) 사용하세요.
+    2. '{product_theme}' 기저귀가 인기가 많은 이유를 가볍게 언급하세요.
+    3. 눈에 보이는 전체 가격보다 '1장당 단가'를 계산해보고 사는 것이 왜 중요한지 팩트를 짚어주세요.
+    4. 랭킹 데이터에서 1위(가장 장당 단가가 저렴한 패키지) 상품을 강조해서 '당장 쟁여야 할 딜'로 추천하세요.
+    5. 본문 중하단 쯤에는 반드시 "더 자세한 기저귀별 장당 최저가 순위와 구매 링크는 아래 계산기 사이트에서 확인하세요!\\n👉 {calc_url}" 문구를 포함시켜주세요. (캡처된 이미지도 함께 보여질 것이라 언급하면 좋습니다)
+    6. 본문 제일 하단에는 공정위 문구 "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."를 포함하세요.
+
+    출력 형식 가이드 (중요): 
+    반드시 아래와 같은 정확한 JSON 포맷으로만 답변을 생성해주세요. 마크다운 기호(```json)나 다른 설명은 일절 추가하지 마세요.
+    {{
+      "title": "여기에 블로그 제목 작성",
+      "content": "여기에 블로그 본문 작성 (HTML 태그는 절대 사용하지 말고, 줄바꿈은 \\n 으로 처리)"
+    }}
+    """
+
+    print("🤖 Gemini API로 블로그 원고 자동 생성 중...")
+    try:
+        model_name = os.getenv('GEMINI_MODEL', 'gemini-1.5-pro')
+        ai_model = client.GenerativeModel(model_name)
+        
+        response = ai_model.generate_content(
+            prompt,
+            generation_config={
+                'response_mime_type': 'application/json',
+            }
+        )
+        
+        parsed_data = json.loads(response.text)
+        return parsed_data.get('title', '제목 생성 실패'), parsed_data.get('content', '본문 생성 실패')
+    except Exception as e:
+        print("❌ 블로그 원고 생성 실패:", e)
+        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+
 import sys
 
 if __name__ == "__main__":
@@ -150,15 +276,19 @@ if __name__ == "__main__":
     # 네이버 아이디 (실제 띄워진 브라우저의 로그인 아이디)
     NAVER_ID = "wugi22"
     
-    # 내 계산기 웹사이트 주소 (GitHub Pages)
+    # 내 계산기 웹사이트 접속 주소 (블로그 본문 첨부용)
     CALC_URL = "https://wugi0525-hue.github.io/coupang-calculator/"
+    
+    # 💡 캡처용 로컬 파일 주소 (인터넷 배포 전 최신 화면 캡처용)
+    LOCAL_HTML_URL = f"file:///{os.path.abspath('index.html')}"
+    
     CAPTURE_IMG = "ranking_capture.png"
     
-    # 💡 [핵심] 9222번 포트(뒷문)가 열린 현존 크롬 창을 강제 조종 (하이재킹)
+    # 💡 [핵심] 9224번 포트(뒷문)가 열린 현존 크롬 창을 강제 조종 (하이재킹)
     chrome_options = Options()
-    chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9224")
     
-    print("📡 뒷문 포트(9222)를 통해 진짜 크롬 브라우저 제어권 획득 시도 중...")
+    print("📡 뒷문 포트(9224)를 통해 진짜 크롬 브라우저 제어권 획득 시도 중...")
     try:
         driver = webdriver.Chrome(options=chrome_options)
         print("✅ 투명 브라우저 하이재킹 성공! (로그인 캡챠 무력화 됨)")
@@ -167,21 +297,15 @@ if __name__ == "__main__":
         exit(1)
         
     # --- 봇 시나리오 실행 ---
-    # 1. 내 웹사이트 캡처하기
-    capture_website(driver, CALC_URL, CAPTURE_IMG)
-    print("🎉 자동화 스크립트 캡처 완료.")
+    # 1. 최신 기저귀 랭킹 화면 캡처하기 (로컬 index.html)
+    capture_website(driver, LOCAL_HTML_URL, CAPTURE_IMG)
+    print("🎉 자동화 캡처 완료.")
     
-    # 3. 자동 포스팅 봇 모듈 동작 시작
-    test_title = "[가성비 필수확인] 2026년 3월 하기스/팸퍼스 기저귀 1장당 진짜 최저가는?"
-    test_content = (
-        "안녕하세요! 육아 필수품인 '기저귀', 겉보기 가격에 속지 마세요!\n"
-        "매일매일 1장당 진짜 단가를 계산해드리는 가성비 봇입니다.\n\n"
-        "오늘의 가장 저렴한 로켓배송 기저귀 순위를 공개합니다! (단백질 파우더 아님 🙅‍♀️)\n\n"
-        "자세한 기저귀 순위와 실시간 1장당 단가는 아래 사진 혹은 사이트를 클릭해 확인해주세요!\n"
-        f"👉 우리 아이 기저귀 최저가 계산기 바로가기: {CALC_URL}\n"
-    )
+    # 3. 자동 포스팅 봇 모듈 동작 시작 (AI 원고 생성)
+    blog_title, blog_content = generate_blog_content("data.json", CALC_URL)
+    print(f"✅ 생성된 제목: {blog_title}")
     
-    # 네이버 블로그 포스팅 함수 실행 (캡처된 이미지 및 텍스트 전달)
-    write_naver_blog(driver, NAVER_ID, test_title, test_content, CAPTURE_IMG)
+    # 네이버 블로그 포스팅 함수 실행 (캡처된 이미지 및 AI 생성 정제 텍스트 전달)
+    write_naver_blog(driver, NAVER_ID, blog_title, blog_content, CAPTURE_IMG)
     print("\n🎉 자동화 스크립트 뼈대 세팅 완료.")
     print("네이버 스마트에디터 구조 파악 전이므로 안전을 위해 주석 해제는 잠시 멈춰두었습니다.")

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가성비 기저귀 추천 Top 20</title>
+    <title>{{ title }}</title>
     <style>
         :root {
             --primary-color: #0073e9;
@@ -12,6 +12,7 @@
             --card-background: #ffffff;
             --text-color: #333333;
             --text-muted: #888888;
+            --tab-bg: #e0e0e0;
         }
 
         body {
@@ -22,6 +23,7 @@
             padding: 0;
         }
 
+        /* 1. 헤더 영역 */
         header {
             background-color: var(--primary-color);
             color: white;
@@ -41,10 +43,112 @@
             opacity: 0.9;
         }
 
-        .container {
-            max-width: 600px;
+        /* 2. 레이아웃: 사이드바 + 메인 콘텐츠 */
+        .main-layout {
+            display: flex;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        aside {
+            width: 250px;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            background-color: var(--background-color);
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            aside {
+                width: auto;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                max-height: 300px;
+            }
+
+            main {
+                padding: 1rem;
+            }
+        }
+
+        /* 트리 메뉴 스타일 */
+        .tree-root {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .tree-root ul {
+            list-style: none;
+            padding-left: 1rem;
+            margin: 0.2rem 0;
+            border-left: 1px dashed #ccc;
+        }
+
+        .tree-root li {
+            margin: 0.3rem 0;
+        }
+
+        details>summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.4rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+            user-select: none;
+            font-size: 0.95rem;
+        }
+
+        details>summary:hover {
+            background-color: #f0f0f0;
+        }
+
+        details[open]>summary {
+            color: var(--primary-color);
+        }
+
+        .leaf-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            width: 100%;
+            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+            border-radius: 4px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .leaf-btn::before {
+            content: '└';
+            position: absolute;
+            left: 0.2rem;
+            color: #ccc;
+        }
+
+        .leaf-btn:hover {
+            background-color: #f0f0f0;
+            color: var(--primary-color);
+        }
+
+        .leaf-btn.active {
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #e6f2ff;
         }
 
         .product-card {
@@ -110,7 +214,6 @@
             font-size: 1.1rem;
             font-weight: bold;
             color: #e52528;
-            /* 쿠팡 특색 색상 */
         }
 
         .unit-price {
@@ -123,28 +226,42 @@
             color: var(--primary-color);
         }
 
+        .badge {
+            font-size: 0.75rem;
+            color: #fff;
+            background-color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
         .affiliate-notice {
             text-align: center;
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 2rem;
             padding: 1rem;
+            line-height: 1.5;
         }
 
-        /* 1, 2, 3위 특별 스타일 */
-        .product-card:nth-child(1) .rank-badge {
+        /* 메달 색상 */
+        .rank-1 {
             color: #FFD700;
             font-size: 1.5rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .product-card:nth-child(2) .rank-badge {
+        .rank-2 {
             color: #C0C0C0;
             font-size: 1.4rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        .product-card:nth-child(3) .rank-badge {
+        .rank-3 {
             color: #CD7F32;
             font-size: 1.3rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -154,37 +271,167 @@
     <header>
         <h1>🏆 이달의 기저귀 가성비 랭킹</h1>
         <p>1매당 가격을 분석해 가장 저렴한 순서대로 추천합니다.</p>
+        <p style="font-size: 0.8rem; margin-top: 0.3rem;">업데이트: {{ update_date }}</p>
     </header>
 
-    <div class="container">
-        {% for item in items %}
-        <a href="{{ item.productUrl }}" target="_blank" rel="noopener noreferrer" class="product-card">
-            <div class="rank-badge">{{ loop.index }}위</div>
-            <!-- 이미지가 있으면 표시, 없으면 임시 박스 -->
-            {% if item.productImage %}
-            <img src="{{ item.productImage }}" alt="상품 이미지" class="product-image">
-            {% else %}
-            <div class="product-image"
-                style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:0.8rem;">
-                이미지<br>준비중</div>
-            {% endif %}
-
-            <div class="product-info">
-                <h2 class="product-name">{{ item.productName }}</h2>
-                <div class="price-info">
-                    <div class="total-price">{{ "{:,}".format(item.productPrice) }}원</div>
-                    <div class="unit-price">{{ item.unitPriceStr }}</div>
-                </div>
+    <div class="main-layout">
+        <aside>
+            <h3
+                style="margin-top:0; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; color: var(--text-color);">
+                카테고리 분류</h3>
+            <div id="sidebar-tree">
+                <!-- 트리 메뉴가 JS에 의해 렌더링 됩니다. -->
             </div>
-        </a>
-        {% endfor %}
+        </aside>
 
-        <div class="affiliate-notice">
-            이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.<br>
-            데이터 수집 시점에 따라 실제 가격과 차이가 있을 수 있습니다.
-        </div>
+        <main id="product-container">
+            <!-- 랭킹 상품들이 JS에 의해 동적으로 렌더링 됩니다. -->
+        </main>
     </div>
 
+    <div class="affiliate-notice">
+        이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.<br>
+        데이터 수집 시점에 따라 실제 가격과 차이가 있을 수 있습니다.
+    </div>
+
+    <script>
+        // 파이썬 로직에서 전달받은 원본 전체 데이터 (JSON 형태)
+        const allItems = {{ items_json | safe }};
+
+        // 1. 트리 구조 데이터 생성
+        const categoryTree = {};
+
+        allItems.forEach(item => {
+            if (!categoryTree[item.brand]) categoryTree[item.brand] = {};
+            if (!categoryTree[item.brand][item.line]) categoryTree[item.brand][item.line] = {};
+            if (!categoryTree[item.brand][item.line][item.type]) categoryTree[item.brand][item.line][item.type] = {};
+
+            const leaf = `${item.stage} ${item.gender}`;
+            // Leaf 값으로는 상품 필터링을 위한 원본 카테고리 문자열을 저장
+            const fullCategoryKey = `${item.brand} ${item.line} ${item.type} ${item.stage} ${item.gender}`;
+            categoryTree[item.brand][item.line][item.type][leaf] = fullCategoryKey;
+        });
+
+        const getCategoryKey = (item) => `${item.brand} ${item.line} ${item.type} ${item.stage} ${item.gender}`;
+
+        let currentCategoryPath = ''; // 활성화된 필터 카테고리
+        const sidebarTree = document.getElementById('sidebar-tree');
+        const productContainer = document.getElementById('product-container');
+
+        // 트리 DOM 재귀적 렌더링 함수
+        function createTreeDOM(tree, isRoot = false) {
+            const ul = document.createElement('ul');
+            if (isRoot) ul.className = 'tree-root';
+
+            for (const key in tree) {
+                const li = document.createElement('li');
+
+                if (typeof tree[key] === 'string') {
+                    // Leaf Node (버튼)
+                    const btn = document.createElement('button');
+                    btn.className = 'leaf-btn';
+                    btn.textContent = key;
+
+                    const fullCategory = tree[key];
+
+                    btn.onclick = () => {
+                        // 모든 버튼 active 초기화
+                        document.querySelectorAll('.leaf-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        currentCategoryPath = fullCategory;
+                        renderProducts();
+
+                        // 모바일 화면일 때 클릭 후 부드럽게 목록으로 스크롤 이동
+                        if (window.innerWidth <= 768) {
+                            productContainer.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    };
+
+                    li.appendChild(btn);
+
+                    // 초기 활성 상태 설정 (첫 번째 리프 노드)
+                    if (!currentCategoryPath) {
+                        currentCategoryPath = fullCategory;
+                        btn.classList.add('active');
+                    }
+                } else {
+                    // Branch Node (details/summary)
+                    const details = document.createElement('details');
+                    // 사용자 요청에 따라 모든 Depth의 메뉴를 기본적으로 열어둠
+                    details.open = true;
+
+                    const summary = document.createElement('summary');
+                    summary.textContent = key;
+                    details.appendChild(summary);
+
+                    // 재귀 호출
+                    details.appendChild(createTreeDOM(tree[key], false));
+                    li.appendChild(details);
+                }
+                ul.appendChild(li);
+            }
+            return ul;
+        }
+
+        // 3. 상품 렌더링
+        function renderProducts() {
+            // 현재 선택된 카테고리에 맞는 상품만 필터링
+            const filteredItems = allItems.filter(item => getCategoryKey(item) === currentCategoryPath);
+
+            // unitPrice(1장당 가격) 기준으로 오름차순(저렴한 순) 정렬
+            filteredItems.sort((a, b) => a.unitPrice - b.unitPrice);
+
+            productContainer.innerHTML = '';
+
+            if (filteredItems.length === 0) {
+                productContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">선택한 카테고리에 상품이 없습니다.</p>';
+                return;
+            }
+
+            filteredItems.forEach((item, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+
+                const badgeInfo = `${item.brand} ${item.line} ${item.type} ${item.stage}`;
+
+                // 숫자 천단위 콤마 포맷터
+                const formatPrice = (price) => new Intl.NumberFormat('ko-KR').format(price);
+
+                const cardHtml = `
+                    <a href="${item.productUrl}" target="_blank" rel="noopener noreferrer" class="product-card">
+                        <div class="rank-badge ${rankClass}">${rank}위</div>
+                        ${item.productImage
+                        ? `<img src="${item.productImage}" alt="상품 이미지" class="product-image">`
+                        : `<div class="product-image" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:0.8rem;">이미지<br>준비중</div>`
+                    }
+                        <div class="product-info">
+                            <div class="badge">${badgeInfo}</div>
+                            <h2 class="product-name">${item.productName}</h2>
+                            <div class="price-info">
+                                <div class="total-price">${formatPrice(item.productPrice)}원 <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(총 ${item.total_count}매)</span></div>
+                                <div class="unit-price">1장당 <span>${formatPrice(item.unitPrice)}원</span></div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                // DOMParser를 쓰거나 문자열 이어붙이기 (단순히 innerHTML 추가)
+                productContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 4. 초기화 실행
+        if (allItems.length > 0) {
+            const treeDOM = createTreeDOM(categoryTree, true);
+            sidebarTree.appendChild(treeDOM);
+            renderProducts();
+        } else {
+            productContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">데이터가 없습니다.</p>';
+        }
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,27 @@
+[ 데이터 수집을 위한 쿠팡 검색어 가이드 ]
+
+각 JSON 파일에 해당하는 추천 쿠팡 검색어입니다. 쿠팡에서 검색하신 후 개발자 도구의 Network 탭 등을 통해 추출한 원본 JSON 데이터(배열 형태)를 해당하는 파일에 붙여넣어주세요.
+
+1. 1_huggies_naturemade_pants_3_boys.json
+   - 검색어: 하기스 네이처메이드 팬티 3단계 남아
+
+2. 2_huggies_naturemade_pants_3_girls.json
+   - 검색어: 하기스 네이처메이드 팬티 3단계 여아
+
+3. 3_huggies_naturemade_pants_4_boys.json
+   - 검색어: 하기스 네이처메이드 팬티 4단계 남아
+
+4. 4_huggies_naturemade_pants_4_girls.json
+   - 검색어: 하기스 네이처메이드 팬티 4단계 여아
+
+5. 5_huggies_maxdry_pants_3_common.json
+   - 검색어: 하기스 맥스드라이 팬티 3단계 (참고: 맥스드라이는 공용으로 나오는 경우가 많습니다)
+
+6. 6_huggies_maxdry_pants_4_common.json
+   - 검색어: 하기스 맥스드라이 팬티 4단계
+
+7. 7_pampers_babydry_pants_4_common.json
+   - 검색어: 팸퍼스 베이비드라이 팬티 4단계 (또는 팸퍼스 베이비드라이 팬티 대형)
+
+8. 8_pampers_babydry_pants_5_common.json
+   - 검색어: 팸퍼스 베이비드라이 팬티 5단계 (또는 팸퍼스 베이비드라이 팬티 특대형)

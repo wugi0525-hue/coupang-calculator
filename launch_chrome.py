@@ -1,5 +1,9 @@
 import os
+import sys
 import subprocess
+
+# 윈도우 콘솔 한글 인코딩 에러 방지 (UTF-8 강제)
+sys.stdout.reconfigure(encoding='utf-8')
 
 chrome_paths = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -17,7 +21,7 @@ if chrome_path:
     # 디버깅 포트 9222로 크롬 실행
     subprocess.Popen([
         chrome_path,
-        "--remote-debugging-port=9222",
+        "--remote-debugging-port=9224",
         r"--user-data-dir=C:\ChromeBot" # 봇 전용 별도 프로필 사용
     ])
 else:
