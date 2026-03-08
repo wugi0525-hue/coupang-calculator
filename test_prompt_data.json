@@ -1,0 +1,26 @@
+[
+  {
+    "category": "kids",
+    "name": "팸퍼스 베이비드라이 팬티형 5단계",
+    "url": "https://www.coupang.com/",
+    "price": "50000",
+    "unit_price": "250",
+    "unit": "1장당",
+    "brand": "팸퍼스",
+    "type": "팬티형",
+    "size": "5단계",
+    "gender": "남녀공용"
+  },
+  {
+    "category": "kids",
+    "name": "하기스 매직팬티 5단계",
+    "url": "https://www.coupang.com/",
+    "price": "60000",
+    "unit_price": "300",
+    "unit": "1장당",
+    "brand": "하기스",
+    "type": "팬티형",
+    "size": "5단계",
+    "gender": "남녀공용"
+  }
+]
