@@ -57,6 +57,10 @@ def send_image_to_clipboard(filepath):
 # 2. 내 계산기 사이트 접속 & 화면 캡처 함수 (시각화)
 def capture_website(driver, url, output_filename):
     """계산기 웹사이트에 접속하여 랭킹 화면을 캡처합니다."""
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
     print(f"[{url}] 본진 사이트로 이동하여 캡처를 준비합니다...")
     driver.get(url)
     
@@ -67,9 +71,16 @@ def capture_website(driver, url, output_filename):
     driver.set_window_size(400, 800)
     time.sleep(1)
     
-    # 현재 화면 전체 캡처
-    driver.save_screenshot(output_filename)
-    print(f"📸 캡처 완료! 파일명: {output_filename}")
+    try:
+        # main#product-container 요소를 찾아서 해당 부분만 캡처 (Dynamic Cropping)
+        container = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "main#product-container"))
+        )
+        container.screenshot(output_filename)
+        print(f"📸 캡처 완료 (크롭 됨)! 파일명: {output_filename}")
+    except Exception as e:
+        print(f"⚠️ 요소를 찾지 못해 전체 캡처로 대체합니다: {e}")
+        driver.save_screenshot(output_filename)
 
 # 3. 네이버 블로그 하이재킹 포스팅 함수 (글쓰기 패스 & 발행)
 def write_naver_blog(driver, naver_id, title, content, image_path, target_link):
@@ -564,65 +575,53 @@ def write_naver_blog(driver, naver_id, title, content, image_path, target_link):
     except Exception as e:
         print(f"❌ 네이버 블로그 작성 중 오류 발생:\n{e}")
 
-# 4. Gemini API를 이용한 블로그 제목 및 본문 자동 생성
-def generate_blog_content(data_filepath, calc_url):
+# 4. Gemini API를 이용한 단일 상품 블로그 제목 및 본문 자동 생성
+def generate_single_item_blog_content(item_data, calc_target_url):
     """
-    정제된 기저귀 단가 데이터(data.json)를 읽어서
-    Gemini 모델이 육아 블로그 스타일의 제목과 본문을 자동 작성합니다.
+    개별 상품 데이터(dict)를 읽어서
+    Gemini 모델이 담백한 리뷰 스타일의 제목과 본문을 자동 작성합니다.
     """
     if not client:
-        print("⚠️ Gemini API 키가 없어 기본 텍스트를 반환합니다.")
-        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+         return "기저귀 단가 비교 정보", "최저가를 확인하세요!"
 
-    try:
-        with open(data_filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except Exception as e:
-         print("❌ data.json 불러오기 실패:", e)
-         return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
-
-    if not data:
-        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
-
-    # 첫번째 아이템으로 메인 테마 추출
-    theme_item = data[0]
-    brand = theme_item.get("brand", "인기")
-    line = theme_item.get("line", "")
-    type_ = theme_item.get("type", "팬티형")
-    stage = theme_item.get("stage", "")
-    gender = theme_item.get("gender", "남녀공용")
+    from datetime import datetime
+    today_str = datetime.now().strftime("%y년 %m월 %d일")
     
-    product_theme = f"{brand} {line} {type_} {stage} {gender}".strip()
-
     prompt = f"""
-    당신은 네이버 블로그 육아/육아템 전문 리뷰어이자 가성비 특가 알리미입니다.
-    이번 주제는 '{product_theme}' 단일 상품에 대한 패키지 매수별 장당 진짜 가격(단가) 랭킹입니다.
-
-    다음 기저귀 단가 랭킹 데이터를 바탕으로, 엄마들이 클릭하고 싶어지는 블로그 포스팅 제목과 본문을 작성해주세요.
+    당신은 쿠팡에서 생필품(예: 기저귀)을 구매할 때, 광고와 추천 상품에 밀려 '진짜 1개당 최저가'를 찾기 힘든 것에 답답함을 느껴 직접 최저가 단가 리스트를 정리하는 일반 소비자입니다.
     
-    데이터:
-    {json.dumps(data, ensure_ascii=False, indent=2)}
-
-    작성 가이드라인:
-    1. 친근하고 공감가는 육아맘/육아대디 말투를 사용하세요. 가독성을 위해 이모지를 적절히(너무 많지 않게) 사용하세요.
-    2. '{product_theme}' 기저귀가 인기가 많은 이유를 가볍게 언급하세요.
-    3. 눈에 보이는 전체 가격보다 '1장당 단가'를 계산해보고 사는 것이 왜 중요한지 팩트를 짚어주세요.
-    4. 랭킹 데이터에서 1위(가장 장당 단가가 저렴한 패키지) 상품을 강조해서 '당장 쟁여야 할 딜'로 추천하세요.
-    5. 본문 중하단 쯤에는 "더 자세한 기저귀별 장당 최저가 순위와 구매 링크는 <b>아래 표(이미지)를 클릭</b>해서 확인하세요!"라는 취지의 안내 문구를 자연스럽게 포함시켜주세요. (이미지에 링크가 걸려있음을 강조)
-    6. 본문 제일 하단에는 공정위 문구 "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."를 포함하세요.
-
-    출력 형식 가이드 (중요): 
-    반드시 아래와 같은 정확한 텍스트 포맷으로만 답변을 생성해주세요. 다른 설명은 일절 추가하지 마세요.
-    [명령] 절대 본문에 http 등으로 시작하는 URL 링크 원문을 그대로 노출하지 마세요! (이미지 클릭 안내만 할 것)
+    다음은 당신이 오늘({today_str}) 확인한 특정 상품의 단가 정보입니다.
+    이 단일 상품의 단가 정보를 공유하는 네이버 블로그 포스팅용 [제목]과 [본문]을 작성해 주세요.
     
+    정보:
+    - 작성 기준일: {today_str}
+    - 상품 카테고리: {item_data.get('category', '미분류')}
+    - 상품명: {item_data.get('name', '상품명 없음')}
+    - 현재 총 가격: {item_data.get('price', '0')}원
+    - 1개(장)당 단가: {item_data.get('unit_price', '0')}원
+    
+    [작성 가이드라인 - 매우 중요]
+    1. 과장된 홍보 멘트, 이모지 남발, '맘블리' 같은 가상의 페르소나 인사말은 싹 다 빼고 **아주 담백하고 진정성 있는 톤앤매너**로 작성하세요. (사실과 정보 전달, 그리고 내가 필요해서 직접 찾는다는 서사만 유지)
+    2. 본문에는 **반드시** 아래의 내용을 자연스럽게 포함하세요:
+       - "같은 주부(또는 소비자)로서 일반 공산품은 가장 저렴한 단가로 사고 싶으나, 쿠팡에서는 최저가 순으로 검색해도 실제 개당 최저가 순으로 나오지 않고 중간에 광고와 추천 상품이 뜹니다. 그래서 내가 정말로 보고 싶은 정보가 안 나와서 답답했습니다."
+       - "그래서 필요에 의해 직접 개당 최저가 리스트를 찾아서 만들었고, 변동이 생길 때마다 ({today_str} 기준) 업데이트를 하고 있습니다."
+    3. [제목] 작성 규칙: 
+       - 반드시 "{today_str} 기준, {item_data.get('name', '')} 실제 1개당 최저가 단가 정보" 형태로 작성하세요.
+    4. 본문 내용 규칙:
+       - 위에서 언급한 진정성 있는 서사 뒤에, 오늘자({today_str}) 기준으로 확인한 해당 상품의 총 가격과 1개당 단가를 명확히 적어주세요.
+       - "상세한 전체 단가 순위표와 구매 링크는 아래 표(이미지)를 클릭해서 확인하세요." 라는 문구를 포함하세요.
+    5. (중요) 본문 내에는 어떠한 형태의 웹사이트 URL이나 쿠팡 링크도 직접 쓰지 마세요. HTML 태그도 빼고 순수 텍스트 줄바꿈으로만 출력.
+    6. (중요) 공정위 제휴 문구("이 포스팅은 쿠팡 파트너스 활동의 일환으로...")는 절대 본문에 포함하지 마세요.
+    
+    출력 형식 가이드 (중요):
     [제목]
-    여기에 블로그 제목 작성
+    (여기에 제목 작성)
     
     [본문]
-    여기에 블로그 본문 작성 (HTML 태그는 절대 사용하지 말고, 줄바꿈은 그냥 엔터로 처리)
+    (여기에 본문 작성)
     """
 
-    print("🤖 Gemini API로 블로그 원고 자동 생성 중...")
+    print(f"🤖 Gemini API로 [{item_data.get('name', '')}] 원고 자동 생성 중...")
     try:
         model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
         ai_model = client.GenerativeModel(model_name)
@@ -630,16 +629,9 @@ def generate_blog_content(data_filepath, calc_url):
         response = ai_model.generate_content(prompt)
         text_resp = response.text.strip()
         
-        print("\n=== AI 원문 디버그 ===")
-        print(text_resp)
-        print("======================\n")
+        title, content = "기저귀 단가 비교 정보", "최저가를 확인하세요!"
         
-        # 텍스트 파싱 ([제목]과 [본문] 태그 기준)
-        title, content = "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
-        
-        # **[제목]** 처럼 생성될 수도 있으므로 불필요 마크다운 제거
         clean_resp = text_resp.replace("**", "").replace("##", "")
-        
         idx_title = clean_resp.find("[제목]")
         idx_content = clean_resp.find("[본문]")
         
@@ -652,126 +644,120 @@ def generate_blog_content(data_filepath, calc_url):
         return title, content
     except Exception as e:
         print("❌ 블로그 원고 생성 실패 자세한 오류:", e)
-        return "기저귀 가성비 랭킹 특가 정보", "기저귀 가성비 랭킹을 알아보세요!"
+        return "기저귀 단가 비교 정보", "최저가를 확인하세요!"
 
 import sys
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
-    print("=== 🤖 하이브리드 자동 포스팅 봇 (8개 카테고리) 가동 ===")
-    
-    # 💡 [핵심 추가] index.html의 JSON 데이터가 비어있지 않도록 봇 실행 직전 빌드합니다.
-    try:
-        from build_html import build
-        print("🔨 최신 data.json을 바탕으로 index.html을 동적 재생성 중...")
-        build()
-    except Exception as e:
-        print(f"❌ HTML 빌드 실패 (무시하고 진행합니다): {e}")
+import asyncio
+import random
+from urllib.parse import quote
 
-    # 네이버 아이디 (실제 띄워진 브라우저의 로그인 아이디)
-    NAVER_ID = "wugi22"
+async def run_auto_poster(status_callback=None):
+    """
+    모든 카테고리에 대한 캡처 및 포스팅 봇의 메인 루프를 실행합니다.
+    status_callback이 주어지면 진행 상황을 외부(예: 텔레그램 봇)로 전달합니다.
+    """
+    async def report(msg):
+        print(msg)
+        if status_callback:
+            await status_callback(msg)
+
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    await report("=== 🤖 쿠팡 랭킹 자동 포스팅 공장 가동 (텔레그램 연동) ===")
     
-    # 내 계산기 웹사이트 접속 주소 (블로그 본문 첨부용)
-    CALC_URL = "https://wugi0525-hue.github.io/coupang-calculator/"
+    # data.json 파일 존재 확인 (루프 밖)
+    if not os.path.exists("data.json"):
+        await report("❌ data.json 파일이 없습니다! 포스팅 봇을 중단합니다.")
+        return False
+        
+    try:
+        with open("data.json", 'r', encoding='utf-8') as f:
+            total_data = json.load(f)
+    except Exception as e:
+        await report(f"❌ 데이터 로드 실패: {e}")
+        return False
+
+    # 개별 아이템 포스팅 단위로 루프 변경
+    await report(f"총 {len(total_data)}개의 유효 상품 데이터를 발견했습니다. 단일 상품 자동 포스팅 루프를 시작합니다.")
     
-    # 💡 캡처용 로컬 파일 주소 (로컬 HTTP 서버 구동)
-    # file:/// 프로토콜은 크롬 Headless에서 CORS 에러(데이터 fetch 불가)를 일으키므로 임시 로컬 서버를 띄웁니다.
+    # --- 로컬용 정적 파일 서버 (캡처용 HTML) 띄우기 ---
+    # Python 기본 http.server 사용, Thread로 백그라운드 실행
+    PORT = random.randint(8000, 9000)
     import http.server
     import socketserver
-    import threading
-
-    Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("127.0.0.1", 0), Handler)
-    PORT = httpd.server_address[1]
     
+    Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("", PORT), Handler)
+    
+    import threading
     server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     server_thread.start()
-    print(f"🌍 로컬 캡처용 웹 서버가 랜덤 포트 {PORT}에서 성공적으로 가동 중입니다...")
+    await report(f"🌍 로컬 캡처용 브라우저 서버 가동 (Port: {PORT})...")
 
+    # URL 조합 (예: http://127.0.0.1:8080/index.html)
     LOCAL_HTML_URL = f"http://127.0.0.1:{PORT}/index.html"
     
     # 💡 [핵심] 9224번 포트(뒷문)가 열린 현존 크롬 창을 강제 조종 (하이재킹)
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9224")
     
-    print("📡 뒷문 포트(9224)를 통해 진짜 크롬 브라우저 제어권 획득 시도 중...")
     try:
         driver = webdriver.Chrome(options=chrome_options)
-        print("✅ 투명 브라우저 하이재킹 성공! (로그인 캡챠 무력화 됨)")
+        await report("✅ 살아있는 크롬(Chrome) 브라우저 하이재킹 성공! (기존 세션 재사용)")
     except Exception as e:
-        print("❌ 실패: 'python launch_chrome.py' 을 먼저 실행해서 봇 전용 크롬을 켜두세요!")
-        exit(1)
+        await report("❌ 오류: 크롬 브라우저가 실행되어 있지 않거나, 9224 디버그 모드로 열리지 않았습니다.")
+        await report("❗ 반드시 launch_chrome.py 를 먼저 실행하여 크롬을 띄워주세요. (혹은 run_chrome_debugger.bat 실행)")
+        httpd.shutdown()
+        return False
+
+    # --- 충돌 방지: 네이버 전용 탭 1개 재사용 ---
+    try:
+        driver.execute_script("window.open('about:blank', '_blank');")
+        driver.switch_to.window(driver.window_handles[-1])
+    except Exception as e:
+        await report("⚠️ 경고: 새 탭 생성 실패, 현재 탭 사용")
+
+    # 내 계산기 웹사이트 접속 주소 (블로그 본문 첨부용)
+    CALC_URL = "https://wugi0525-hue.github.io/coupang-calculator/"
+    # 네이버 아이디 (실제 띄워진 브라우저의 로그인 아이디)
+    NAVER_ID = "wugi22"
+
+    for idx, item in enumerate(total_data):
+        item_name = item.get("name", "Unknown Item")
+        # 해당 아이템이 속한 전체 카테고리 필터링 값 생성
+        cat_key = f"{item.get('brand','')} {item.get('line','')} {item.get('type','')} {item.get('stage','')} {item.get('gender','')}".strip()
+        encoded_category = quote(cat_key)
+
+        await report(f"\n=============================================")
+        await report(f"▶ [{idx+1}/{len(total_data)}] 단일 포스팅: '{item_name}' 준비 중...")
         
-    master_data_file = "data.json"
-    if not os.path.exists(master_data_file):
-        print(f"❌ {master_data_file} 가 없습니다. calc_logic.py를 먼저 실행하세요.")
-        exit(1)
+        # 1. 대상 카테고리를 표시하는 캡처용 브릿지 URL (화면엔 해당 카테고리 랭킹이 뜸)
+        target_local_url = f"{LOCAL_HTML_URL}?category={encoded_category}"
         
-    with open(master_data_file, 'r', encoding='utf-8') as f:
-        master_data = json.load(f)
+        capture_img = "ranking_capture.png"
+        await report("📸 단계 1: 화면 다이나믹 캡처 엔진 가동...")
+        capture_website(driver, target_local_url, capture_img)
         
-    # Group items by category string
-    categories_dict = {}
-    for item in master_data:
-        cat_key = f"{item['brand']} {item['line']} {item['type']} {item['stage']} {item['gender']}"
-        if cat_key not in categories_dict:
-            categories_dict[cat_key] = []
-        categories_dict[cat_key].append(item)
-        
-    target_categories_names = sorted(list(categories_dict.keys()))
-    print(f"총 {len(target_categories_names)}개의 카테고리 자동 포스팅 루프를 시작합니다.")
-    
-    # --- 충돌 방지: 티스토리 봇과 겹치지 않도록 네이버 전용 탭을 딱 1개만 열어서 루프 내내 재사용 ---
-    print("새 탭을 열어 네이버 전용 작업을 독립적으로 시작합니다...")
-    driver.execute_script("window.open('about:blank', '_blank');")
-    driver.switch_to.window(driver.window_handles[-1])
-    # -------------------------------------------------------------------------
-    
-    for idx, category_name in enumerate(target_categories_names):
-        print(f"\n=============================================")
-        print(f"▶ [{idx+1}/{len(target_categories_names)}] '{category_name}' 포스팅 준비 중...")
-        
-        # 1. 캡처용 URL에 param 추가하여 해당 카테고리 열기
-        encoded_category = urllib.parse.quote(category_name)
-        target_url = f"{LOCAL_HTML_URL}?category={encoded_category}"
-        capture_img = f"ranking_capture_{idx}.png"
-        
-        from capture_site import capture_calculator_site
-        capture_calculator_site(url_path=target_url, output_filename=capture_img)
-        print("🎉 카테고리 필터 적용 캡처 완료.")
-        
-        # 2. 해당 카테고리 데이터만 추출해서 임시 파일(temp.json)로 만들기 (AI용)
-        cat_data = categories_dict[category_name]
-        cat_data.sort(key=lambda x: x['unitPrice']) # 혹시 모르니 다시 정렬
-        top_10_data = cat_data[:10]  # 너무 많으면 혼동하므로 10개만 보냄
-        
-        temp_file = "temp_category.json"
-        with open(temp_file, 'w', encoding='utf-8') as f:
-            json.dump(top_10_data, f, ensure_ascii=False, indent=2)
-            
-        # 3. 자동 포스팅 봇 모듈 동작 시작 (AI 원고 생성)
+        # 2. 자동 포스팅 봇 모듈 동작 시작 (AI 원고 단일 생성)
         public_target_url = f"{CALC_URL}?category={encoded_category}"
-        blog_title, blog_content = generate_blog_content(temp_file, public_target_url)
-        print(f"✅ 생성된 제목: {blog_title}")
+        await report(f"🤖 단계 2: AI 원고 크리에이터 엔진 기동 (Item: {item_name})...")
+        blog_title, blog_content = generate_single_item_blog_content(item, public_target_url)
+        await report(f"✅ 생성된 제목: {blog_title}")
         
-        # 4. 네이버 블로그 포스팅 진행
+        # 3. 네이버 블로그 포스팅 진행
+        await report("📝 단계 3: 네이버 블로그 하이재킹 포스팅 엔진 진입...")
         write_naver_blog(driver, NAVER_ID, blog_title, blog_content, os.path.abspath(capture_img), public_target_url)
         
-        # [유저 요청 완벽 반영] 포스팅이 완료된 후 사용된 임시 파일(캡처, json) 자동 삭제
-        try:
-            if os.path.exists(capture_img):
-                os.remove(capture_img)
-                print(f"🗑️ 성공적으로 사용된 캡처본({capture_img}) 삭제 완료.")
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
-        except Exception as del_e:
-            print(f"⚠️ 임시 파일 삭제 실패: {del_e}")
-            
-        print(f"⏳ 다음 글쓰기를 위해 잠시 대기합니다 (10초)...")
-        time.sleep(10)
+        # 쿨다운 
+        await report("⏳ 네이버 어뷰징 방지를 위한 대기모드 전환 (10초)...")
+        await asyncio.sleep(10)
         
-        # [유저 요청 완벽 반영] 블로그 발행 직전 테스트를 위해 1번만 돌고 루프 종료
-        print("테스트 목적이므로 1회 실행 후 스크립트를 즉시 종료합니다.")
-        break
-        
-    print("\n🎉 모든 8개 카테고리의 포스팅 반복 작업이 완료되었습니다!")
+    await report("\n🎉 완료! 전체 데이터 리스트(단일 항목별) 포스팅 작업이 성공적으로 끝났습니다.")
+    
+    # 서버 닫기
+    httpd.shutdown()
+    return True
+
+if __name__ == "__main__":
+    # 터미널에서 단독 배치 스크립트로 실행 시
+    asyncio.run(run_auto_poster())
