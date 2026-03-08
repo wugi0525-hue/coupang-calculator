@@ -314,7 +314,14 @@
 
         const getCategoryKey = (item) => `${item.brand} ${item.line} ${item.type} ${item.stage} ${item.gender}`;
 
-        let currentCategoryPath = ''; // 활성화된 필터 카테고리
+        // URL에서 특정 카테고리를 요청받았는지 확인 (스크린샷 캡쳐 자동화용)
+        const urlParams = new URLSearchParams(window.location.search);
+        let requestedCategory = urlParams.get('category');
+        if (requestedCategory) {
+            requestedCategory = decodeURIComponent(requestedCategory);
+        }
+
+        let currentCategoryPath = requestedCategory || ''; // 활성화된 필터 카테고리
         const sidebarTree = document.getElementById('sidebar-tree');
         const productContainer = document.getElementById('product-container');
 
@@ -340,6 +347,10 @@
                         btn.classList.add('active');
 
                         currentCategoryPath = fullCategory;
+
+                        // 현재 선택된 카테고리를 URL에 반영 (새로고침 없이 주소창 업데이트)
+                        window.history.replaceState(null, '', '?category=' + encodeURIComponent(fullCategory));
+
                         renderProducts();
 
                         // 모바일 화면일 때 클릭 후 부드럽게 목록으로 스크롤 이동
@@ -350,8 +361,11 @@
 
                     li.appendChild(btn);
 
-                    // 초기 활성 상태 설정 (첫 번째 리프 노드)
-                    if (!currentCategoryPath) {
+                    // 초기 활성 상태 설정
+                    if (currentCategoryPath === fullCategory) {
+                        btn.classList.add('active');
+                    } else if (!currentCategoryPath) {
+                        // URL에 지정된 값이 아무것도 없다면, 만나는 첫 번째 리프 노드를 활성화
                         currentCategoryPath = fullCategory;
                         btn.classList.add('active');
                     }

@@ -9,7 +9,7 @@ def generate_index_html():
     """
     
     # 1. 정렬된 최종 결과 데이터 읽기
-    data_file = 'final_ranking.json'
+    data_file = 'data.json'
     
     if not os.path.exists(data_file):
         print(f"오류: {data_file} 파일을 찾을 수 없습니다.")
